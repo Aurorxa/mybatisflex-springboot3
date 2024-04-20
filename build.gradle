@@ -42,13 +42,18 @@ configurations {
 }
 
 repositories {
-    maven {
-        url 'https://maven.aliyun.com/repository/public/'
+
+    if (System.getProperty("GITHUB_ACTIONS") == "true") {
+        mavenCentral()
+    }else{
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+        mavenCentral()
     }
-    maven {
-        url 'https://maven.aliyun.com/repository/central'
-    }
-    mavenCentral()
 }
 
 ext {
