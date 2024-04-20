@@ -33,12 +33,6 @@ jobs:
           node-version: "latest"
       - name: "安装Gradle"
         uses: gradle/actions/setup-gradle@v3
-      - name: "修改Gradle中的build.gradle脚本中的仓库为Maven中央仓库"
-        run: |
-           echo "repositories { mavenCentral() }" > tempFile
-           awk '/repositories {/{flag=1;next}/}/{flag=0}flag' build.gradle >> tempFile
-           mv tempFile build.gradle
-           awk '/repositories \{/,/}/' build.gradle
       - name: "设置Gradle的jar包的缓存"
         uses: actions/cache@v2
         with:
