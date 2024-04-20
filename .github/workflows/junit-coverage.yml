@@ -26,7 +26,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: maven # 缓存依赖项
       - name: "安装Node.js环境"
         uses: actions/setup-node@v3
         with:
