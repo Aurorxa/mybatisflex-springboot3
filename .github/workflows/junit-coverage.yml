@@ -33,12 +33,13 @@ jobs:
           node-version: "latest"
       - name: "安装Gradle"
         uses: gradle/actions/setup-gradle@v3
-      - name: "Gradle运行和单元测试、编译"
+      - name: "修改Gradle中的build.gradle脚本中的仓库为Maven中央仓库"
         run: |
-          chmod +x ./gradlew
-          ./gradlew clean assemble --info --no-daemon
-          ./gradlew test --info --no-daemon
-      - name: "Cache Gradle packages"
+           echo "repositories { mavenCentral() }" > tempFile
+           awk '/repositories {/{flag=1;next}/}/{flag=0}flag' build.gradle >> tempFile
+           mv tempFile build.gradle
+           awk '/repositories \{/,/}/' build.gradle
+      - name: "设置Gradle的jar包的缓存"
         uses: actions/cache@v2
         with:
           path: |
@@ -47,6 +48,11 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: "Gradle运行和单元测试、编译"
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean assemble --info --no-daemon
+          ./gradlew test --info --no-daemon
       - name: "将指定的单元测试文件进行压缩"
         if: always()
         run: |
