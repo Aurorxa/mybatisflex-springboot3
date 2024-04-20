@@ -35,7 +35,7 @@ jobs:
       - name: "Gradle运行和单元测试、编译"
         run: |
           chmod +x ./gradlew
-          ./gradlew clean build --info --batch-mode --update-snapshots verify
+          ./gradlew clean build --info
       - name: "将指定的单元测试文件进行压缩"
         if: always()
         run: |
