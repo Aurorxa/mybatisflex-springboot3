@@ -36,7 +36,17 @@ jobs:
       - name: "Gradle运行和单元测试、编译"
         run: |
           chmod +x ./gradlew
-          ./gradlew clean build --info --no-daemon
+          ./gradlew clean assemble --info --no-daemon
+          ./gradlew test --info --no-daemon
+      - name: "Cache Gradle packages"
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: "将指定的单元测试文件进行压缩"
         if: always()
         run: |
