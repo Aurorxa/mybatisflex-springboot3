@@ -33,11 +33,6 @@ jobs:
           node-version: 16
       - name: "安装Gradle"
         uses: gradle/gradle-build-action@v3
-      - name: "输出JDK、Maven和Node.js的版本"
-        run: |
-          mvn -v
-          node -v
-          java -version
       - name: "Gradle运行和单元测试、编译"
         run: |
           chmod +x ./gradlew
