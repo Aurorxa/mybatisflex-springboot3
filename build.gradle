@@ -35,6 +35,11 @@ sourceSets { // 建立源代码的目录集合
     }
 }
 
+// 指定注解处理器的输出目录
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file("$buildDir/generated/sources/annotationProcessor/java/main"))
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor

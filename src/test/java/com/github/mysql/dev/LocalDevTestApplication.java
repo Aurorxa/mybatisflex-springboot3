@@ -4,11 +4,13 @@ import com.github.Application;
 import com.github.dao.CustomerRepository;
 import com.github.domain.Customer;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
+@Slf4j
 @Testcontainers
 public class LocalDevTestApplication {
 
@@ -23,10 +25,8 @@ public class LocalDevTestApplication {
     }
 
     public void test() {
-        List<Customer> customers = List.of(
-                new Customer(null, "John", "john@mail.com"),
-                new Customer(null, "Dennis", "dennis@mail.com")
-        );
+        List<Customer> all = customerRepository.findAll();
+        log.info("LocalDevTestApplication.test ==> {}", all);
     }
 
 }
