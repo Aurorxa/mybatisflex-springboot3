@@ -13,7 +13,10 @@ group = 'com.github'
 version = '0.0.1'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+//        vendor = JvmVendorSpec.ORACLE
+    }
 }
 
 sourceSets { // 建立源代码的目录集合
@@ -65,12 +68,6 @@ ext {
     ]
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "com.mybatis-flex:mybatis-flex-dependencies:${versions.mybatisFlex}"
-    }
-}
-
 dependencies {
     /* JPA */
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -79,8 +76,8 @@ dependencies {
     /* web */
     implementation 'org.springframework.boot:spring-boot-starter-web'
     /* mybatis */
-    implementation "com.mybatis-flex:mybatis-flex-spring-boot-starter"
-    annotationProcessor "com.mybatis-flex:mybatis-flex-processor"
+    implementation "com.mybatis-flex:mybatis-flex-spring-boot-starter:${versions.mybatisFlex}"
+    annotationProcessor "com.mybatis-flex:mybatis-flex-processor:${versions.mybatisFlex}"
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
     /* lombok */
@@ -97,9 +94,12 @@ dependencies {
     /* testcontainers */
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:mysql'
-//    testImplementation 'org.testcontainers:mongodb'
+    testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:junit-jupiter'
+    /* webAPI 测试 */
     testImplementation 'io.rest-assured:rest-assured'
+    /* 异步线程测试 */
+    testImplementation 'org.awaitility:awaitility'
     /* devtools */
     testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
@@ -116,6 +116,11 @@ idea {
 
 tasks.named('test') {
     useJUnitPlatform()
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
     finalizedBy jacocoTestReport
 }
 
