@@ -17,12 +17,12 @@ jobs:
       TEST_JACOCO_PATH: ${{ github.workspace }}/**/jacoco.xml
     steps: # 步骤
       - name: "拉取仓库代码"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "查看代码目录"
         run: |
           pwd && ls -lah
       - name: "设置JDK环境"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
@@ -34,7 +34,7 @@ jobs:
       - name: "安装Gradle"
         uses: gradle/actions/setup-gradle@v3
       - name: "设置Gradle的jar包的缓存"
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -140,7 +140,7 @@ jobs:
           tar -xvf archive.tar.gz
           ls -lah .
       - name: "生成单元测试报告"
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
           files: |
             TEST-*.xml
