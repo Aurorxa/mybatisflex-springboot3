@@ -63,7 +63,7 @@ jobs:
           rm -rf "$tmp_dir"
       - name: "上传archive.tar.gz压缩文件"
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: archive
           path: archive.tar.gz
