@@ -97,7 +97,7 @@ dependencies {
     testImplementation 'org.testcontainers:mysql'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:junit-jupiter'
-    /* webAPI 测试 */
+    /* WEBAPI 测试 */
     testImplementation 'io.rest-assured:rest-assured'
     /* 异步线程测试 */
     testImplementation 'org.awaitility:awaitility'

@@ -25,7 +25,7 @@ import static com.github.domain.table.AccountTableDef.ACCOUNT;
 @Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class ApplicationTest {
+class QuickStartTest {
 
     @Container
     @ServiceConnection
@@ -60,13 +60,16 @@ class ApplicationTest {
                 .stream()
                 .map(Account::getId)
                 .toList();
+
         accountMapper.deleteBatchByIds(ids);
     }
 
     @Test
     void testQuickStart() {
         List<Account> accountList = accountMapper.selectAll();
+
         log.info("ApplicationTest.testQuickStart ==> {}", accountList);
+
         Assertions.assertEquals(2, accountList.size());
     }
 
@@ -79,7 +82,9 @@ class ApplicationTest {
                 .where(ACCOUNT.AGE.ge(18));
 
         Account account = accountMapper.selectOneByQuery(queryWrapper);
+
         log.info("ApplicationTest.testQuickQuery ==> {}", account);
+
         Assertions.assertNotNull(account);
     }
 

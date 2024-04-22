@@ -19,4 +19,8 @@ public class Account {
     private Integer age;
 
     private Date birthday;
+
+    private Date createTime;
+
+    private Date updateTime;
 }
