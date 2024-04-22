@@ -1,12 +1,11 @@
-CREATE TABLE IF NOT EXISTS `customers` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `customer` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(255) NOT NULL UNIQUE,
-    PRIMARY KEY (`id`)
+    `email` VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `tb_account`(
-    `id`        INTEGER PRIMARY KEY auto_increment,
+    `id`        INTEGER PRIMARY KEY AUTO_INCREMENT,
     `user_name` VARCHAR(100),
     `age`       INTEGER,
     `birthday`  DATETIME

@@ -7,7 +7,12 @@ spring:
       # always 始终初始化数据库，embedded 如果正在使用嵌入式数据库，请始终初始化，默认值，never 从不初始化数据库
       # MySQL 或 PostGreSQL 是非嵌入式数据库，需要使用 always，而 SQLite 是嵌入式数据库，需要使用 embedded
       mode: always
+      platform: mysql # 平台是 MySQL
 
 mybatis-flex:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+  level:
+    org.springframework.jdbc.datasource.init.ScriptUtils: debug
+    sql: debug

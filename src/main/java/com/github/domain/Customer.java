@@ -6,18 +6,19 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
-@Entity
+@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "customers")
+@Entity
+@Table(name = "customer")
 public class Customer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String email;
 }
