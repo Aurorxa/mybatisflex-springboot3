@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic.insert;
+package com.github.mysql.junit.basic.update;
 
 import com.github.Application;
 import com.github.domain.Account;
@@ -15,11 +15,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Map;
+
+import static com.github.domain.table.AccountTableDef.ACCOUNT;
+
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertTest {
+class BasicUpdateByMap2Test {
 
     @Container
     @ServiceConnection
@@ -28,34 +32,41 @@ class BasicInsertTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsert() {
+    void testUpdateByMap() {
         Account account = new Account();
         account.setUserName("abc");
-        account.setAge(18);
 
-        /*
-           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
-           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
-           VALUES ('abc', 18, null, null, null)
-         */
-        accountMapper.insert(account);
-
-        Assertions.assertNotNull(account);
+        // 新增，会忽略 NULL 值
+        int size = accountMapper.insertSelective(account);
+        Assertions.assertEquals(1, size);
         Assertions.assertNotNull(account.getId());
 
+        Account account2 = new Account();
+        account2.setUserName("bcd");
+        account2.setAge(18);
+
+        // 新增，会忽略 NULL 值
+        int size2 = accountMapper.insertSelective(account2);
+        Assertions.assertEquals(1, size2);
+        Assertions.assertNotNull(account2.getId());
+
+        /*
+            更新数据，不忽略 NULL
+            UPDATE `tb_account`
+            SET `user_name` = null , `age` = 19 , `birthday` = null , `create_time` = null , `update_time` = null
+            WHERE `tb_account`.`user_name` = 'abc'
+         */
+        Map<String, Object> whereConditions = Map.of(ACCOUNT.USER_NAME.getName(), "abc");
+        int size3 = accountMapper.updateByMap(new Account().setAge(19), false, whereConditions);
+        Assertions.assertEquals(1, size3);
+
+        // 查询数据
         Account accountDb = accountMapper.selectOneById(account.getId());
-
-        log.info("BasicInsertTest.testInsert.accountDb ==> {}", accountDb);
-
         Assertions.assertNotNull(accountDb);
-        Assertions.assertNotNull(accountDb.getId());
-        Assertions.assertNotNull(accountDb.getUserName());
         Assertions.assertNotNull(accountDb.getAge());
         Assertions.assertNull(accountDb.getBirthday());
         Assertions.assertNull(accountDb.getCreateTime());
         Assertions.assertNull(accountDb.getUpdateTime());
-        Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
-        Assertions.assertEquals(account.getAge(), accountDb.getAge());
     }
 
 

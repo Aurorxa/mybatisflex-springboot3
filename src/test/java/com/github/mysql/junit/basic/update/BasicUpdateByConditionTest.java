@@ -1,8 +1,9 @@
-package com.github.mysql.junit.basic.insert;
+package com.github.mysql.junit.basic.update;
 
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.mybatisflex.core.query.QueryCondition;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -15,11 +16,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Date;
+
+import static com.github.domain.table.AccountTableDef.ACCOUNT;
+
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertSelectiveTest {
+class BasicUpdateByConditionTest {
 
     @Container
     @ServiceConnection
@@ -28,33 +33,39 @@ class BasicInsertSelectiveTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsertSelective() {
+    void testUpdateByCondition() {
         Account account = new Account();
         account.setUserName("abc");
-        account.setAge(18);
 
-        /*
-          忽略 NULL 值，即数据库中有默认值设置，就会使用数据库中的默认值
-          INSERT INTO `tb_account`(`user_name`, `age`) VALUES ('abc', 18)
-        */
-        accountMapper.insertSelective(account);
-
-        Assertions.assertNotNull(account);
+        // 新增，会忽略 NULL 值
+        int size = accountMapper.insertSelective(account);
+        Assertions.assertEquals(1, size);
         Assertions.assertNotNull(account.getId());
 
-        Account accountDb = accountMapper.selectOneById(account.getId());
+        Account account2 = new Account();
+        account2.setUserName("bcd");
+        account2.setAge(18);
 
-        log.info("BasicInsertSelectiveTest.testInsertSelective.accountDb ==> {}", accountDb);
+        // 新增，会忽略 NULL 值
+        int size2 = accountMapper.insertSelective(account2);
+        Assertions.assertEquals(1, size2);
+        Assertions.assertNotNull(account2.getId());
 
+        /*
+            更新数据
+            UPDATE `tb_account` SET `age` = 19 WHERE `tb_account`.`user_name` = 'abc'
+         */
+        QueryCondition queryCondition = ACCOUNT.AGE.eq(18);
+        int size3 = accountMapper.updateByCondition(new Account().setBirthday(new Date()), queryCondition);
+        Assertions.assertEquals(1, size3);
+
+        // 查询数据
+        Account accountDb = accountMapper.selectOneById(account2.getId());
         Assertions.assertNotNull(accountDb);
-        Assertions.assertNotNull(accountDb.getId());
-        Assertions.assertNotNull(accountDb.getUserName());
         Assertions.assertNotNull(accountDb.getAge());
-        Assertions.assertNull(accountDb.getBirthday());
+        Assertions.assertNotNull(accountDb.getBirthday());
         Assertions.assertNotNull(accountDb.getCreateTime());
         Assertions.assertNotNull(accountDb.getUpdateTime());
-        Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
-        Assertions.assertEquals(account.getAge(), accountDb.getAge());
     }
 
 

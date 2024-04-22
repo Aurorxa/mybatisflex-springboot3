@@ -1,8 +1,9 @@
-package com.github.mysql.junit.basic.delete;
+package com.github.mysql.junit.basic.update;
 
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.mybatisflex.core.util.UpdateEntity;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -15,16 +16,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Map;
-import java.util.Random;
-
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicDeleteByMapTest {
+class BasicUpdateEntityTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -32,30 +28,30 @@ class BasicDeleteByMapTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testDeleteByMap() {
-        // 新增数据
+    void testUpdateEntity() {
         Account account = new Account();
-        account.setId(Math.abs(new Random().nextLong()));
         account.setUserName("abc");
         account.setAge(18);
-        accountMapper.insert(account);
+        // 新增，会忽略 NULL 值
+        int size = accountMapper.insertSelective(account);
+        Assertions.assertEquals(1, size);
+        Assertions.assertNotNull(account);
+        Assertions.assertNotNull(account.getId());
 
-        // 查询数据
-        Account accountDb = accountMapper.selectOneById(account.getId());
-        Assertions.assertNotNull(accountDb);
-
-        /*
-          删除数据，这种方式只能用于 = ，需要注意的是，这种方式需要拼接实际数据库的字段名，而非实体类的属性名
-          DELETE FROM `tb_account`
-          WHERE `tb_account`.`user_name` = 'abc'
-         */
-        Map<String, Object> whereCondition = Map.of(ACCOUNT.USER_NAME.getName(), "abc");
-        int size = accountMapper.deleteByMap(whereCondition);
+        // 部分字段更新，即更新的字段中，希望一些可以为 NULL，一些可以不为 NULL，即开发者自行选择
+        Account account2 = UpdateEntity.of(Account.class, account.getId());
+        account2.setUserName(null);
+        account2.setAge(10);
+        // 更新
+        size = accountMapper.update(account2);
         Assertions.assertEquals(1, size);
 
-        // 查询数据
-        accountDb = accountMapper.selectOneById(account.getId());
-        Assertions.assertNull(accountDb);
+        Account accountDb = accountMapper.selectOneById(account.getId());
+        Assertions.assertNotNull(accountDb);
+        Assertions.assertNull(accountDb.getUserName());
+        Assertions.assertNotNull(accountDb.getAge());
+        Assertions.assertNull(accountDb.getBirthday());
+        Assertions.assertNotNull(accountDb.getCreateTime());
+        Assertions.assertNotNull(accountDb.getUpdateTime());
     }
-
 }
