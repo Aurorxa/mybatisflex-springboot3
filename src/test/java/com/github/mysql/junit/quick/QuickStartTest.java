@@ -1,4 +1,4 @@
-package com.github.mysql.junit;
+package com.github.mysql.junit.quick;
 
 import com.github.Application;
 import com.github.domain.Account;

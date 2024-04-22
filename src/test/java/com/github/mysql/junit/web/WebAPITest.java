@@ -1,4 +1,4 @@
-package com.github.mysql.junit;
+package com.github.mysql.junit.web;
 
 import com.github.Application;
 import com.github.dao.CustomerRepository;
