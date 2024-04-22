@@ -40,7 +40,7 @@ sourceSets { // 建立源代码的目录集合
 
 // 指定注解处理器的输出目录
 tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(file("$buildDir/generated/sources/annotationProcessor/java/main"))
+    options.getGeneratedSourceOutputDirectory().set(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
 }
 
 configurations {
@@ -65,6 +65,7 @@ ext {
 
     versions = [
             mybatisFlex: '1.8.8',
+            mybatis: '3.0.3'
     ]
 }
 
@@ -78,8 +79,8 @@ dependencies {
     /* mybatis */
     implementation "com.mybatis-flex:mybatis-flex-spring-boot-starter:${versions.mybatisFlex}"
     annotationProcessor "com.mybatis-flex:mybatis-flex-processor:${versions.mybatisFlex}"
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatis}"
+    testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${versions.mybatis}"
     /* lombok */
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

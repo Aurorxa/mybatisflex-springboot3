@@ -14,16 +14,16 @@ import org.springframework.context.annotation.Configuration;
 public class MyBatisFlexConfiguration implements MyBatisFlexCustomizer, ConfigurationCustomizer, SqlSessionFactoryBeanCustomizer {
 
     @Override
-    public void customize(FlexConfiguration configuration) {
-        log.info("MyBatisFlexConfiguration.customize.configuration ==> {}", configuration);
-    }
-
-    @Override
     public void customize(FlexGlobalConfig globalConfig) {
         String name = globalConfig
                 .getDbType()
                 .getName();
         log.info("MyBatisFlexConfiguration.customize.globalConfig ==> {}", name);
+    }
+
+    @Override
+    public void customize(FlexConfiguration configuration) {
+        log.info("MyBatisFlexConfiguration.customize.configuration ==> {}", configuration);
     }
 
     @Override

@@ -6,12 +6,12 @@ import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -21,12 +21,10 @@ import java.util.Date;
 import java.util.List;
 
 import static com.github.domain.table.AccountTableDef.ACCOUNT;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-@DirtiesContext(classMode = AFTER_CLASS)
 class ApplicationTest {
 
     @Container
@@ -36,9 +34,8 @@ class ApplicationTest {
     @Resource
     private AccountMapper accountMapper;
 
-    @Order(1)
-    @Test
-    void testQuickInsert() {
+    @BeforeEach
+    void setupTestData() {
         Account account = new Account();
         account.setAge(18);
         account.setUserName("张三");
@@ -55,8 +52,18 @@ class ApplicationTest {
         Assertions.assertNotNull(account2.getId());
     }
 
+    @AfterEach
+    void cleanup() {
+        List<Account> accountList = accountMapper.selectAll();
+
+        List<Long> ids = accountList
+                .stream()
+                .map(Account::getId)
+                .toList();
+        accountMapper.deleteBatchByIds(ids);
+    }
+
     @Test
-    @Order(1)
     void testQuickStart() {
         List<Account> accountList = accountMapper.selectAll();
         log.info("ApplicationTest.testQuickStart ==> {}", accountList);
@@ -64,7 +71,6 @@ class ApplicationTest {
     }
 
     @Test
-    @Order(2)
     void testQuickQuery() {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
