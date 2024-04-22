@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic;
+package com.github.mysql.junit.basic.insert;
 
 import com.github.Application;
 import com.github.domain.Account;

@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic;
+package com.github.mysql.junit.basic.insert;
 
 import com.github.Application;
 import com.github.domain.Account;
@@ -14,14 +14,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Random;
-
 @Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertWithPk2Test {
-    // 随机数的上限
-    private static final Long upperBound = 100_000_000_000L;
+class BasicInsert2Test {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -29,9 +25,8 @@ class BasicInsertWithPk2Test {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsertWithPk1() {
+    void testInsert1() {
         Account account = new Account();
-        account.setId(Math.abs(new Random().nextLong()));
         account.setUserName("abc");
         account.setAge(18);
 
@@ -40,14 +35,14 @@ class BasicInsertWithPk2Test {
            INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
            VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insertWithPk(account, false); // 相当于 insertWithPk()
+        accountMapper.insert(account, false); // 相当于 insert()
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
         Account accountDb = accountMapper.selectOneById(account.getId());
 
-        log.info("BasicInsertWithPk2Test.testInsertWithPk1.accountDb ==> {}", accountDb);
+        log.info("BasicInsert2Test.testInsert1.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -61,9 +56,8 @@ class BasicInsertWithPk2Test {
     }
 
     @Test
-    void testInsertWithPk2() {
+    void testInsert2() {
         Account account = new Account();
-        account.setId(Math.abs(new Random().nextLong()) % upperBound);
         account.setUserName("abc");
         account.setAge(18);
 
@@ -72,14 +66,14 @@ class BasicInsertWithPk2Test {
           INSERT INTO `tb_account`(`user_name`, `age`)
           VALUES ('abc', 18)
         */
-        accountMapper.insertWithPk(account, true); // 相当于 insertSelectiveWithPk()
+        accountMapper.insert(account, true); // 相当于 insertSelective()
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
         Account accountDb = accountMapper.selectOneById(account.getId());
 
-        log.info("BasicInsertWithPk2Test.testInsertWithPk2.accountDb ==> {}", accountDb);
+        log.info("BasicInsert2Test.testInsert2.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -91,4 +85,5 @@ class BasicInsertWithPk2Test {
         Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
         Assertions.assertEquals(account.getAge(), accountDb.getAge());
     }
+
 }
