@@ -17,7 +17,7 @@ import org.testcontainers.utility.DockerImageName;
 @Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertTest {
+class BasicInsertOrUpdateTest {
 
     @Container
     @ServiceConnection
@@ -26,7 +26,7 @@ class BasicInsertTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsert() {
+    void testInsertOrUpdate() {
         Account account = new Account();
         account.setUserName("abc");
         account.setAge(18);
@@ -36,14 +36,14 @@ class BasicInsertTest {
            INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
            VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insert(account);
+        accountMapper.insertOrUpdate(account);
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
         Account accountDb = accountMapper.selectOneById(account.getId());
 
-        log.info("BasicInsertTest.testInsert.accountDb ==> {}", accountDb);
+        log.info("BasicInsertOrUpdateTest.testInsertOrUpdate2.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -54,6 +54,27 @@ class BasicInsertTest {
         Assertions.assertNull(accountDb.getUpdateTime());
         Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
         Assertions.assertEquals(account.getAge(), accountDb.getAge());
+
+        /*
+         * 因为有主键，所以此处是更新
+         * UPDATE `tb_account`
+         * SET `user_name` = 'abc' , `age` = 18 , `birthday` = null , `create_time` = null , `update_time` = null
+         * WHERE `id` = 1
+         */
+        accountMapper.insertOrUpdate(accountDb);
+
+        Account accountDb2 = accountMapper.selectOneById(accountDb.getId());
+        log.info("BasicInsertOrUpdateTest.testInsertOrUpdate2.accountDb2 ==> {}", accountDb2);
+
+        Assertions.assertNotNull(accountDb2);
+        Assertions.assertNotNull(accountDb2.getId());
+        Assertions.assertNotNull(accountDb2.getUserName());
+        Assertions.assertNotNull(accountDb2.getAge());
+        Assertions.assertNull(accountDb2.getBirthday());
+        Assertions.assertNull(accountDb2.getCreateTime());
+        Assertions.assertNull(accountDb2.getUpdateTime());
+        Assertions.assertEquals(accountDb2.getUserName(), accountDb.getUserName());
+        Assertions.assertEquals(accountDb2.getAge(), accountDb.getAge());
     }
 
 
