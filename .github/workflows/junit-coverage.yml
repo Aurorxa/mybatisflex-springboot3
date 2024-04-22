@@ -131,7 +131,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "下载archive.tar.gz压缩文件"
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: archive
       - name: "解压archive.tar.gz压缩文件"
