@@ -3,7 +3,6 @@ package com.github.mysql.junit;
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
-import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -15,12 +14,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 class BasicInsertTest {
+
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -45,14 +43,9 @@ class BasicInsertTest {
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.AGE.ge(18));
-        Account accountDb = accountMapper.selectOneByQuery(queryWrapper);
+        Account accountDb = accountMapper.selectOneById(account.getId());
 
-        log.info("ApplicationTest.testInsert ==> {}", accountDb);
+        log.info("ApplicationTest.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -78,12 +71,7 @@ class BasicInsertTest {
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.AGE.ge(18));
-        Account accountDb = accountMapper.selectOneByQuery(queryWrapper);
+        Account accountDb = accountMapper.selectOneById(account.getId());
 
         log.info("ApplicationTest.testInsertSelective ==> {}", accountDb);
 
