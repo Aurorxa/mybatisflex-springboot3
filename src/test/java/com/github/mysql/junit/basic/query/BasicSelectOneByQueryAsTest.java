@@ -3,6 +3,8 @@ package com.github.mysql.junit.basic.query;
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.github.vo.AccountVo;
+import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +27,7 @@ import static com.github.domain.table.AccountTableDef.ACCOUNT;
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicSelectOneByQueryTest {
+class BasicSelectOneByQueryAsTest {
 
     @Container
     @ServiceConnection
@@ -34,7 +36,7 @@ class BasicSelectOneByQueryTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testSelectOneByQuery() {
+    void testSelectOneByQueryAs() {
         Account account = new Account();
         account.setUserName("abc");
         account.setAge(18);
@@ -51,34 +53,36 @@ class BasicSelectOneByQueryTest {
 
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
+                .select(ACCOUNT.ALL_COLUMNS, QueryMethods
+                        .if_(ACCOUNT.AGE.ge(18), QueryMethods.true_(), QueryMethods.false_())
+                        .as("is_audit"))
                 .where(ACCOUNT.USER_NAME.eq("abc"));
         /*
          * 查询数据
          *
-         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time` FROM `tb_account`
+         * SELECT *, IF(`age` >= ?, TRUE, FALSE) AS `is_audit`
+         * FROM `tb_account`
          * WHERE `user_name` = ? LIMIT 1
          */
-        Account accountDb = accountMapper.selectOneByQuery(queryWrapper);
+        AccountVo accountVo = accountMapper.selectOneByQueryAs(queryWrapper, AccountVo.class);
 
-        log.info("BasicSelectOneByQueryTest.testSelectOneByQuery.accountDb ==> {}", accountDb);
+        log.info("BasicSelectOneByQueryTest.testSelectOneByQueryAs.accountVo ==> {}", accountVo);
 
-        Assertions.assertNotNull(accountDb);
-        Assertions.assertNotNull(accountDb.getId());
-        Assertions.assertNotNull(accountDb.getUserName());
-        Assertions.assertNotNull(accountDb.getAge());
-        Assertions.assertNull(accountDb.getBirthday());
-        Assertions.assertNull(accountDb.getCreateTime());
-        Assertions.assertNull(accountDb.getUpdateTime());
-        Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
-        Assertions.assertEquals(account.getAge(), accountDb.getAge());
+        Assertions.assertNotNull(accountVo);
+        Assertions.assertNotNull(accountVo.getId());
+        Assertions.assertNotNull(accountVo.getUserName());
+        Assertions.assertNull(accountVo.getBirthday());
+        Assertions.assertNull(accountVo.getCreateTime());
+        Assertions.assertEquals(account.getUserName(), accountVo.getUserName());
+        Assertions.assertTrue(accountVo.getIsAudit());
     }
 
     @Test
-    void testSelectOneByQuery2() {
+    void testSelectOneByQueryAs2() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account()
                 .setUserName("a")
-                .setAge(18));
+                .setAge(17));
         accountList.add(new Account()
                 .setUserName("b")
                 .setAge(19));
@@ -96,25 +100,26 @@ class BasicSelectOneByQueryTest {
 
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
+                .select(ACCOUNT.ALL_COLUMNS, QueryMethods
+                        .if_(ACCOUNT.AGE.ge(18), QueryMethods.true_(), QueryMethods.false_())
+                        .as("is_audit"))
                 .where(ACCOUNT.USER_NAME.in("a", "b", "c", "d", "e"));
         /*
          * 查询数据
          *
-         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time`
+         * SELECT *, IF(`age` >= ?, TRUE, FALSE) AS `is_audit`
          * FROM `tb_account`
          * WHERE `user_name` IN (?, ?, ?, ?, ?) LIMIT 1
          */
-        Account accountDb = accountMapper.selectOneByQuery(queryWrapper);
+        AccountVo accountVo = accountMapper.selectOneByQueryAs(queryWrapper, AccountVo.class);
 
-        log.info("BasicSelectOneByQueryTest.testSelectOneByQuery2.accountDb ==> {}", accountDb);
-        
-        Assertions.assertNotNull(accountDb);
-        Assertions.assertNotNull(accountDb.getId());
-        Assertions.assertNotNull(accountDb.getUserName());
-        Assertions.assertNotNull(accountDb.getAge());
-        Assertions.assertNull(accountDb.getBirthday());
-        Assertions.assertNull(accountDb.getCreateTime());
-        Assertions.assertNull(accountDb.getUpdateTime());
+        log.info("BasicSelectOneByQueryTest.testSelectOneByQueryAs2.accountVo ==> {}", accountVo);
+
+        Assertions.assertNotNull(accountVo);
+        Assertions.assertNotNull(accountVo.getId());
+        Assertions.assertNotNull(accountVo.getUserName());
+        Assertions.assertNull(accountVo.getBirthday());
+        Assertions.assertNull(accountVo.getCreateTime());
     }
 
 
