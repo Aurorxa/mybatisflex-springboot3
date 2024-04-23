@@ -1,16 +1,13 @@
 package com.github.mysql.junit.querywrapper;
 
-import com.github.Application;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 class QuickStartTest {
 
     @Test
-    public void test() {
+    void test() {
 
 
     }
