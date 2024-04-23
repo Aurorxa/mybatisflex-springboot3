@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic.insert;
+package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
@@ -15,13 +15,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Random;
+import java.util.Map;
+
+import static com.github.domain.table.AccountTableDef.ACCOUNT;
 
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertWithPkTest {
+class BasicSelectOneByMapTest {
 
     @Container
     @ServiceConnection
@@ -30,26 +32,32 @@ class BasicInsertWithPkTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsertWithPk() {
+    void testSelectOneByMap() {
         Account account = new Account();
-        account.setId(Math.abs(new Random().nextLong()));
         account.setUserName("abc");
         account.setAge(18);
 
         /*
            不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
-
            INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
            VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insertWithPk(account);
+        accountMapper.insert(account);
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
-        Account accountDb = accountMapper.selectOneById(account.getId());
+        /*
+         * 查询数据
+         *
+         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time`
+         * FROM `tb_account`
+         * WHERE `tb_account`.`user_name` = ? LIMIT 1
+         */
+        Map<String, Object> whereConditions = Map.of(ACCOUNT.USER_NAME.getName(), "abc");
+        Account accountDb = accountMapper.selectOneByMap(whereConditions);
 
-        log.info("BasicInsertWithPkTest.testInsertWithPk.accountDb ==> {}", accountDb);
+        log.info("BasicSelectOneByMapTest.testSelectOneByMap.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -60,6 +68,38 @@ class BasicInsertWithPkTest {
         Assertions.assertNull(accountDb.getUpdateTime());
         Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
         Assertions.assertEquals(account.getAge(), accountDb.getAge());
+    }
+
+    @Test
+    void testSelectOneByMap2() {
+        Account account = new Account();
+        account.setUserName("abc");
+        account.setAge(18);
+
+        /*
+           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+
+           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
+           VALUES ('abc', 18, null, null, null)
+         */
+        accountMapper.insert(account);
+
+        Assertions.assertNotNull(account);
+        Assertions.assertNotNull(account.getId());
+
+        /*
+         * 查询数据
+         *
+         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time`
+         * FROM `tb_account`
+         * WHERE `tb_account`.`user_name` = ? AND `tb_account`.`age` = ? LIMIT 1
+         */
+        Map<String, Object> whereConditions = Map.of(ACCOUNT.USER_NAME.getName(), "abc", ACCOUNT.AGE.getName(), 19);
+        Account accountDb = accountMapper.selectOneByMap(whereConditions);
+
+        log.info("BasicSelectOneByMapTest.testSelectOneByMap2.accountDb ==> {}", accountDb);
+
+        Assertions.assertNull(accountDb);
     }
 
 

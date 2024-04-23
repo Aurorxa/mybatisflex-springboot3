@@ -52,6 +52,7 @@ class BasicUpdateByMap2Test {
 
         /*
             更新数据，不忽略 NULL
+
             UPDATE `tb_account`
             SET `user_name` = null , `age` = 19 , `birthday` = null , `create_time` = null , `update_time` = null
             WHERE `tb_account`.`user_name` = 'abc'

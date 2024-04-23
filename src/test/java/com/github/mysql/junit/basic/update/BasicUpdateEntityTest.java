@@ -32,6 +32,7 @@ class BasicUpdateEntityTest {
         Account account = new Account();
         account.setUserName("abc");
         account.setAge(18);
+
         // 新增，会忽略 NULL 值
         int size = accountMapper.insertSelective(account);
         Assertions.assertEquals(1, size);
@@ -42,7 +43,14 @@ class BasicUpdateEntityTest {
         Account account2 = UpdateEntity.of(Account.class, account.getId());
         account2.setUserName(null);
         account2.setAge(10);
-        // 更新
+        
+        /*
+         * 更新数据
+         *
+         * UPDATE `tb_account`
+         * SET `user_name` = null , `age` = 10
+         * WHERE `id` = 1
+         */
         size = accountMapper.update(account2);
         Assertions.assertEquals(1, size);
 

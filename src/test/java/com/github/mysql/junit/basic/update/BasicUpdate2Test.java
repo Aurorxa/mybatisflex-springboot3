@@ -43,7 +43,13 @@ class BasicUpdate2Test {
         account2.setId(account.getId());
         account2.setUserName("bcd");
 
-        // 修改，不忽略 NULL 值，即属性为 NULL 的数据会更新到数据库中
+        /*
+         * 修改，不忽略 NULL 值，即属性为 NULL 的数据会更新到数据库中
+         *
+         * UPDATE `tb_account`
+         * SET `user_name` = 'bcd' , `age` = null , `birthday` = null , `create_time` = null , `update_time` = null
+         * WHERE `id` = 1
+         */
         size = accountMapper.update(account2, false);
         Assertions.assertEquals(1, size);
 

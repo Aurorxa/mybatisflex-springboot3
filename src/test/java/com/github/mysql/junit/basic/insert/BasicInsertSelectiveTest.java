@@ -35,6 +35,7 @@ class BasicInsertSelectiveTest {
 
         /*
           忽略 NULL 值，即数据库中有默认值设置，就会使用数据库中的默认值
+
           INSERT INTO `tb_account`(`user_name`, `age`) VALUES ('abc', 18)
         */
         accountMapper.insertSelective(account);

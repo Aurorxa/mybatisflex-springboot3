@@ -47,6 +47,7 @@ public class BasicUpdateWrapperTest {
         account2.setAge(10);
         /*
           在以上的部分字段更新中，只能更新为用户传入的数据，但是有些时候我们想更新为数据库计算的数据
+
           UPDATE `tb_account`
           SET `user_name` = ? , `age` = age + 1
           WHERE `id` = ?
@@ -56,6 +57,7 @@ public class BasicUpdateWrapperTest {
         size = accountMapper.update(account2);
         Assertions.assertEquals(1, size);
 
+        // 查询数据
         Account accountDb = accountMapper.selectOneById(account.getId());
         Assertions.assertNotNull(accountDb);
         Assertions.assertNull(accountDb.getUserName());

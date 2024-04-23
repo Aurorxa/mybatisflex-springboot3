@@ -52,7 +52,10 @@ class BasicUpdateByMapTest {
 
         /*
             更新数据
-            UPDATE `tb_account` SET `age` = 19 WHERE `tb_account`.`user_name` = 'abc'
+
+            UPDATE `tb_account`
+            SET `age` = 19
+            WHERE `tb_account`.`user_name` = 'abc'
          */
         Map<String, Object> whereConditions = Map.of(ACCOUNT.USER_NAME.getName(), "abc");
         int size3 = accountMapper.updateByMap(new Account().setAge(19), whereConditions);

@@ -53,6 +53,7 @@ class BasicUpdateByQuery2Test {
 
         /*
             更新数据
+
             UPDATE `tb_account`
             SET `user_name` = null , `age` = null , `birthday` = ? , `create_time` = null , `update_time` = null
             WHERE `age` = 18

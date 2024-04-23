@@ -46,6 +46,7 @@ class BasicDeleteByConditionTest {
 
         /*
           删除数据，这种方式可以组合任意条件
+
           DELETE FROM `tb_account` WHERE `user_name` = ? AND `age` = ?
          */
         QueryCondition queryCondition = ACCOUNT.USER_NAME

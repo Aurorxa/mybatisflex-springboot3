@@ -41,7 +41,12 @@ class BasicDeleteByIdTest {
         Account accountDb = accountMapper.selectOneById(account.getId());
         Assertions.assertNotNull(accountDb);
 
-        // 删除数据
+        /*
+         * 删除数据
+         *
+         * DELETE FROM `tb_account`
+         * WHERE `id` = ?
+         */
         int size = accountMapper.deleteById(account.getId());
         Assertions.assertEquals(1, size);
 

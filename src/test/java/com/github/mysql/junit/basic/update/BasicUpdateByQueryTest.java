@@ -53,6 +53,7 @@ class BasicUpdateByQueryTest {
 
         /*
             更新数据
+
             UPDATE `tb_account` SET `age` = 19 WHERE `tb_account`.`user_name` = 'abc'
          */
         QueryWrapper queryWrapper = QueryWrapper

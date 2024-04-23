@@ -46,7 +46,9 @@ class BasicDeleteByQueryTest {
 
         /*
           删除数据，这种方式可以组合任意条件；不过，QueryWrapper 多用于查询
-          DELETE FROM `tb_account` WHERE `user_name` = ? AND `age` = ?
+
+          DELETE FROM `tb_account`
+          WHERE `user_name` = ? AND `age` = ?
          */
         QueryWrapper queryWrapper = QueryWrapper
                 .create()

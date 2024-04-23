@@ -54,6 +54,7 @@ class BasicDeleteBatchByIds2Test {
 
         /*
           删除数据
+
           DELETE FROM `tb_account` WHERE `id` = ? OR `id` = ?
           DELETE FROM `tb_account` WHERE `id` = ? OR `id` = ?
          */

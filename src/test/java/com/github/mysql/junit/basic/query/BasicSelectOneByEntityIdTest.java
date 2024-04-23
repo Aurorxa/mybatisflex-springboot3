@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic.insert;
+package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
@@ -21,7 +21,7 @@ import java.util.Random;
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertWithPkTest {
+class BasicSelectOneByEntityIdTest {
 
     @Container
     @ServiceConnection
@@ -30,9 +30,8 @@ class BasicInsertWithPkTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsertWithPk() {
+    void testSelectOneByEntityId() {
         Account account = new Account();
-        account.setId(Math.abs(new Random().nextLong()));
         account.setUserName("abc");
         account.setAge(18);
 
@@ -42,14 +41,21 @@ class BasicInsertWithPkTest {
            INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
            VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insertWithPk(account);
+        accountMapper.insert(account);
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
-        Account accountDb = accountMapper.selectOneById(account.getId());
+        /*
+         * 查询数据
+         *
+         * SELECT *
+         * FROM `tb_account`
+         * WHERE `id` = ?
+         */
+        Account accountDb = accountMapper.selectOneByEntityId(account);
 
-        log.info("BasicInsertWithPkTest.testInsertWithPk.accountDb ==> {}", accountDb);
+        log.info("BasicSelectOneByEntityIdTest.testSelectOneByEntityId.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
@@ -60,6 +66,45 @@ class BasicInsertWithPkTest {
         Assertions.assertNull(accountDb.getUpdateTime());
         Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
         Assertions.assertEquals(account.getAge(), accountDb.getAge());
+    }
+
+    @Test
+    void testSelectOneByEntityId2() {
+        Account account = new Account();
+        account.setUserName("abc");
+        account.setAge(18);
+
+        /*
+           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+
+           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
+           VALUES ('abc', 18, null, null, null)
+         */
+        accountMapper.insert(account);
+
+        Assertions.assertNotNull(account);
+        Assertions.assertNotNull(account.getId());
+
+        Long randomNumber = new Random()
+                .longs(1, Long.MAX_VALUE)
+                .filter(n -> n != account.getId())
+                .limit(1)
+                .sum();
+
+        account.setId(randomNumber);
+
+        /*
+         * 查询数据
+         *
+         * SELECT *
+         * FROM `tb_account`
+         * WHERE `id` = ?
+         */
+        Account accountDb = accountMapper.selectOneByEntityId(account);
+
+        log.info("BasicSelectOneByEntityIdTest.testSelectOneByEntityId2.accountDb ==> {}", accountDb);
+
+        Assertions.assertNull(accountDb);
     }
 
 

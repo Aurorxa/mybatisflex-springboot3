@@ -53,7 +53,10 @@ class BasicUpdateByConditionTest {
 
         /*
             更新数据
-            UPDATE `tb_account` SET `age` = 19 WHERE `tb_account`.`user_name` = 'abc'
+
+            UPDATE `tb_account`
+            SET `age` = 19
+            WHERE `tb_account`.`user_name` = 'abc'
          */
         QueryCondition queryCondition = ACCOUNT.AGE.eq(18);
         int size3 = accountMapper.updateByCondition(new Account().setBirthday(new Date()), queryCondition);

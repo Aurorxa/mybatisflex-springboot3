@@ -54,7 +54,9 @@ class BasicDeleteBatchByIdsTest {
 
         /*
           删除数据
-          DELETE FROM `tb_account` WHERE `id` = ? OR `id` = ? OR `id` = ? OR `id` = ?
+
+          DELETE FROM `tb_account`
+          WHERE `id` = ? OR `id` = ? OR `id` = ? OR `id` = ?
          */
         List<Long> idsArray = accountDbList
                 .stream()

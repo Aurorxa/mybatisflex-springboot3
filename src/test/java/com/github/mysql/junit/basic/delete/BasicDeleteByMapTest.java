@@ -46,6 +46,7 @@ class BasicDeleteByMapTest {
 
         /*
           删除数据，这种方式只能用于 = ，需要注意的是，这种方式需要拼接实际数据库的字段名，而非实体类的属性名
+
           DELETE FROM `tb_account`
           WHERE `tb_account`.`user_name` = 'abc'
          */

@@ -43,7 +43,9 @@ class BasicDeleteTest {
 
         /*
           删除数据，根据实体主键来删除数据。相比 deleteById(id)，此方法更便于对复合主键实体类的删除。
-          DELETE FROM `tb_account` WHERE `id` = 1
+
+          DELETE FROM `tb_account`
+          WHERE `id` = 1
          */
         int size = accountMapper.delete(accountDb);
         Assertions.assertEquals(1, size);

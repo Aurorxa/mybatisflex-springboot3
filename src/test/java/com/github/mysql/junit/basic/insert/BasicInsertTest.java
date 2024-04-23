@@ -35,6 +35,7 @@ class BasicInsertTest {
 
         /*
            不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+
            INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
            VALUES ('abc', 18, null, null, null)
          */

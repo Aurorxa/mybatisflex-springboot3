@@ -32,6 +32,7 @@ class BasicUpdateTest {
         Account account = new Account();
         account.setUserName("abc");
         account.setAge(18);
+
         // 新增，会忽略 NULL 值
         int size = accountMapper.insertSelective(account);
         Assertions.assertEquals(1, size);
@@ -42,7 +43,13 @@ class BasicUpdateTest {
         account2.setId(account.getId());
         account2.setUserName("bcd");
 
-        // 修改，会忽略 NULL 值，即属性为 NULL 的数据不会更新到数据库中
+        /*
+         * 修改，会忽略 NULL 值，即属性为 NULL 的数据不会更新到数据库中
+         *
+         * UPDATE `tb_account`
+         * SET `user_name` = 'bcd'
+         * WHERE `id` = 1
+         */
         size = accountMapper.update(account2);
         Assertions.assertEquals(1, size);
 

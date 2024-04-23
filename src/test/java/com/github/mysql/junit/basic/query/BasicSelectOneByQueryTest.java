@@ -1,4 +1,4 @@
-package com.github.mysql.junit.basic.insert;
+package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
@@ -15,11 +15,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Random;
+
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicInsertOrUpdateSelectiveTest {
+class BasicSelectOneByQueryTest {
 
     @Container
     @ServiceConnection
@@ -28,56 +30,72 @@ class BasicInsertOrUpdateSelectiveTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testInsertOrUpdateSelective() {
+    void testSelectOneByQuery() {
         Account account = new Account();
         account.setUserName("abc");
         account.setAge(18);
 
         /*
-           忽略 NULL 值，即数据库中有默认值设置，就使用数据库中的值
-
-           INSERT INTO `tb_account`(`user_name`, `age`)
-           VALUES ('abc', 18)
+           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
+           VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insertOrUpdateSelective(account);
+        accountMapper.insert(account);
 
         Assertions.assertNotNull(account);
         Assertions.assertNotNull(account.getId());
 
         Account accountDb = accountMapper.selectOneById(account.getId());
 
-        log.info("BasicInsertOrUpdateTest.testInsertOrUpdateSelective.accountDb ==> {}", accountDb);
+        log.info("BasicSelectOneByQueryTest.testSelectOneByQuery.accountDb ==> {}", accountDb);
 
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
         Assertions.assertNotNull(accountDb.getUserName());
         Assertions.assertNotNull(accountDb.getAge());
         Assertions.assertNull(accountDb.getBirthday());
-        Assertions.assertNotNull(accountDb.getCreateTime());
-        Assertions.assertNotNull(accountDb.getUpdateTime());
+        Assertions.assertNull(accountDb.getCreateTime());
+        Assertions.assertNull(accountDb.getUpdateTime());
         Assertions.assertEquals(account.getUserName(), accountDb.getUserName());
         Assertions.assertEquals(account.getAge(), accountDb.getAge());
+    }
+
+    @Test
+    void testSelectOneByQuery2() {
+        Account account = new Account();
+        account.setUserName("abc");
+        account.setAge(18);
 
         /*
-         * 因为有主键，所以此处是更新
-         * UPDATE `tb_account`
-         * SET `user_name` = 'abc' , `age` = 18 , `create_time` = ? , `update_time` = ?
-         * WHERE `id` = 1
+           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+
+           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
+           VALUES ('abc', 18, null, null, null)
          */
-        accountMapper.insertOrUpdateSelective(accountDb);
+        accountMapper.insert(account);
 
-        Account accountDb2 = accountMapper.selectOneById(accountDb.getId());
-        log.info("BasicInsertOrUpdateTest.testInsertOrUpdateSelective.accountDb2 ==> {}", accountDb2);
+        Assertions.assertNotNull(account);
+        Assertions.assertNotNull(account.getId());
 
-        Assertions.assertNotNull(accountDb2);
-        Assertions.assertNotNull(accountDb2.getId());
-        Assertions.assertNotNull(accountDb2.getUserName());
-        Assertions.assertNotNull(accountDb2.getAge());
-        Assertions.assertNull(accountDb2.getBirthday());
-        Assertions.assertNotNull(accountDb2.getCreateTime());
-        Assertions.assertNotNull(accountDb2.getUpdateTime());
-        Assertions.assertEquals(accountDb2.getUserName(), accountDb.getUserName());
-        Assertions.assertEquals(accountDb2.getAge(), accountDb.getAge());
+        Long randomNumber = new Random()
+                .longs(1, Long.MAX_VALUE)
+                .filter(n -> n != account.getId())
+                .limit(1)
+                .sum();
+
+        /*
+         * 查询数据
+         *
+         * SELECT *
+         * FROM `tb_account`
+         * WHERE `id` = ?
+         */
+        Account accountDb = accountMapper.selectOneById(randomNumber);
+
+        log.info("BasicSelectOneByQueryTest.testSelectOneByQuery2.accountDb ==> {}", accountDb);
+
+        Assertions.assertNull(accountDb);
     }
+
 
 }
