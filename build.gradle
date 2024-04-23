@@ -103,6 +103,8 @@ dependencies {
     testImplementation 'org.awaitility:awaitility'
     /* devtools */
     testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
+    /* SQL 美化 */
+    implementation 'com.github.vertical-blank:sql-formatter:2.0.5'
 }
 
 jar {

@@ -13,18 +13,12 @@ import java.util.List;
 @Data
 @Table("tb_account")
 @Accessors(chain = true)
-public class Account {
+public class Role {
 
     @Id(keyType = KeyType.Auto)
     private Long id;
 
-    private String userName;
-
-    private Integer age;
-
-    private Date birthday;
-
-    private Integer gender;
+    private String roleName;
 
     private Date createTime;
 
@@ -32,8 +26,10 @@ public class Account {
 
     @RelationManyToMany(
             joinTable = "tb_account_role", // 中间表
-            selfField = "id", joinSelfColumn = "account_id",
-            targetField = "id", joinTargetColumn = "role_id"
+            selfField = "id", // 当前实体类的属性
+            joinSelfColumn = "role_id", // 当前表和中间表的关系字段
+            targetField = "id", // 目标实体类的属性
+            joinTargetColumn = "account_id" // 目标表和中间表的关系字段
     )
-    private List<Role> role;
+    private List<Account> accounts;
 }
