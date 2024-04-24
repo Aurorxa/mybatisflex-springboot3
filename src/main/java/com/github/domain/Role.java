@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Table("tb_account")
+@Table("tb_role")
 @Accessors(chain = true)
 public class Role {
 

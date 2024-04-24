@@ -7,6 +7,7 @@ import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +30,9 @@ public class Account {
     private Date createTime;
 
     private Date updateTime;
+
+    private BigDecimal money;
+
 
     @RelationManyToMany(
             joinTable = "tb_account_role", // 中间表

@@ -3,6 +3,7 @@ package com.github.mysql.junit.basic.update;
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.github.service.AccountService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -26,6 +27,8 @@ class BasicUpdateTest {
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
     @Resource
     private AccountMapper accountMapper;
+    @Resource
+    private AccountService accountService;
 
     @Test
     void testUpdate() {
@@ -51,7 +54,11 @@ class BasicUpdateTest {
          * WHERE `id` = 1
          */
         size = accountMapper.update(account2);
+
         Assertions.assertEquals(1, size);
+
+        boolean b = accountService.updateById(account2);
+        log.info("==== {}", b);
 
         // 查询数据
         Account accountDb = accountMapper.selectOneById(account.getId());

@@ -3,6 +3,7 @@ package com.github.vo;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -18,5 +19,7 @@ public class AccountVo {
     private Date createTime;
 
     private Boolean isAudit;
+
+    private BigDecimal money;
 
 }

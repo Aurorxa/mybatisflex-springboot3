@@ -3,6 +3,7 @@ package com.github.mysql.junit.basic.query;
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.github.service.AccountService;
 import com.github.vo.AccountVo;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -18,6 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,8 @@ class BasicSelectOneByQueryAsTest {
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
     @Resource
     private AccountMapper accountMapper;
+    @Resource
+    private AccountService accountService;
 
     @Test
     void testSelectOneByQueryAs() {
@@ -82,19 +86,24 @@ class BasicSelectOneByQueryAsTest {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account()
                 .setUserName("a")
-                .setAge(17));
+                .setAge(17)
+                .setMoney(new BigDecimal(100)));
         accountList.add(new Account()
                 .setUserName("b")
-                .setAge(19));
+                .setAge(19)
+                .setMoney(new BigDecimal("100.00")));
         accountList.add(new Account()
                 .setUserName("c")
-                .setAge(20));
+                .setAge(20)
+                .setMoney(new BigDecimal("102.00")));
         accountList.add(new Account()
                 .setUserName("d")
-                .setAge(21));
+                .setAge(21)
+                .setMoney(new BigDecimal("100.12")));
         accountList.add(new Account()
                 .setUserName("e")
-                .setAge(22));
+                .setAge(22)
+                .setMoney(new BigDecimal("100.15")));
 
         accountMapper.insertBatch(accountList);
 
@@ -112,6 +121,10 @@ class BasicSelectOneByQueryAsTest {
          * WHERE `user_name` IN (?, ?, ?, ?, ?) LIMIT 1
          */
         AccountVo accountVo = accountMapper.selectOneByQueryAs(queryWrapper, AccountVo.class);
+
+        AccountVo objAs = accountService.getOneAs(queryWrapper, AccountVo.class);
+
+        log.info("objAs => {} ", objAs);
 
         log.info("BasicSelectOneByQueryTest.testSelectOneByQueryAs2.accountVo ==> {}", accountVo);
 
