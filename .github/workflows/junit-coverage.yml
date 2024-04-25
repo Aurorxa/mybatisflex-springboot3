@@ -12,6 +12,9 @@ permissions: write-all
 jobs:
   build: # 单元测试
     runs-on: ubuntu-latest
+    concurrency: # 添加并发策略
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     env:
       TEST_JUNIT_PATH: ${{ github.workspace }}/**/TEST-*.xml
       TEST_JACOCO_PATH: ${{ github.workspace }}/**/jacoco.xml
