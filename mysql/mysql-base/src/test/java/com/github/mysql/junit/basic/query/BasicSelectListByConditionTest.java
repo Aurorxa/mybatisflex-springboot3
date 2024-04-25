@@ -2,8 +2,9 @@ package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.QueryCondition;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -19,13 +20,11 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicSelectCountByQueryTest {
+class BasicSelectListByConditionTest {
 
     @Container
     @ServiceConnection
@@ -34,7 +33,7 @@ class BasicSelectCountByQueryTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testSelectCountByQuery() {
+    void testSelectListByCondition() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account()
                 .setUserName("a")
@@ -62,25 +61,25 @@ class BasicSelectCountByQueryTest {
                 .setAge(20));
 
         int size = accountMapper.insertBatch(accountList);
-        log.info("BasicSelectCountByQueryTest.testSelectCountByQuery.size ==> {}", size);
+        log.info("BasicSelectListByConditionTest.testSelectListByCondition.size ==> {}", size);
 
         /*
          * 查询数据
          *
-         * SELECT `age`
+         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time`
          * FROM `tb_account`
-         * WHERE `age` >= ?
+         * WHERE `age` >= ? AND `user_name` IN (?, ?, ?)
          */
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
-                .select(ACCOUNT.AGE)
-                .where(ACCOUNT.AGE.ge(20));
+        QueryCondition queryCondition = AccountTableDef.ACCOUNT.AGE
+                .ge(20)
+                .and(AccountTableDef.ACCOUNT.USER_NAME.in("a", "b", "c"));
 
-        long count = accountMapper.selectCountByQuery(queryWrapper);
+        List<Account> accountDbList = accountMapper.selectListByCondition(queryCondition);
 
-        log.info("BasicSelectCountByQueryTest.testSelectCountByQuery.count==> {}", count);
+        log.info("BasicSelectListByConditionTest.testSelectListByCondition.accountDbList ==> {}", accountDbList);
 
-        Assertions.assertEquals(7, count);
+        Assertions.assertNotNull(accountDbList);
+        Assertions.assertEquals(2, accountDbList.size());
     }
 
 

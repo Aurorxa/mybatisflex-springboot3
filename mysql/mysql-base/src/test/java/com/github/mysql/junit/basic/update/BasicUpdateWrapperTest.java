@@ -23,7 +23,7 @@ import static com.github.domain.table.AccountTableDef.ACCOUNT;
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-public class BasicUpdateWrapperTest {
+class BasicUpdateWrapperTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));

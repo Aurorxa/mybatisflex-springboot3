@@ -2,6 +2,7 @@ package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryCondition;
 import jakarta.annotation.Resource;
@@ -19,13 +20,11 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicSelectListByConditionTest {
+class BasicSelectCountByConditionTest {
 
     @Container
     @ServiceConnection
@@ -34,7 +33,7 @@ class BasicSelectListByConditionTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testSelectListByCondition() {
+    void testSelectCountByCondition() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account()
                 .setUserName("a")
@@ -62,25 +61,23 @@ class BasicSelectListByConditionTest {
                 .setAge(20));
 
         int size = accountMapper.insertBatch(accountList);
-        log.info("BasicSelectListByConditionTest.testSelectListByCondition.size ==> {}", size);
+        log.info("BasicSelectCountByConditionTest.testSelectCountByCondition.size ==> {}", size);
 
         /*
          * 查询数据
          *
-         * SELECT `id`, `user_name`, `age`, `birthday`, `create_time`, `update_time`
+         * SELECT `age`
          * FROM `tb_account`
-         * WHERE `age` >= ? AND `user_name` IN (?, ?, ?)
+         * WHERE `age` >= ?
          */
-        QueryCondition queryCondition = ACCOUNT.AGE
-                .ge(20)
-                .and(ACCOUNT.USER_NAME.in("a", "b", "c"));
 
-        List<Account> accountDbList = accountMapper.selectListByCondition(queryCondition);
+        QueryCondition queryCondition = AccountTableDef.ACCOUNT.AGE.ge(20);
 
-        log.info("BasicSelectListByConditionTest.testSelectListByCondition.accountDbList ==> {}", accountDbList);
+        long count = accountMapper.selectCountByCondition(queryCondition);
 
-        Assertions.assertNotNull(accountDbList);
-        Assertions.assertEquals(2, accountDbList.size());
+        log.info("BasicSelectCountByConditionTest.testSelectCountByCondition.count==> {}", count);
+
+        Assertions.assertEquals(7, count);
     }
 
 

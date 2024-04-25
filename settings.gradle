@@ -1,1 +1,4 @@
 rootProject.name = 'mybatis-flex-springboot3'
+include 'mysql:mysql-base'
+findProject(':mysql:mysql-base')?.name = 'mysql-base'
+

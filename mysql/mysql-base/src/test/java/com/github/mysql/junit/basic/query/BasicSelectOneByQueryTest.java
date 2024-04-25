@@ -107,7 +107,7 @@ class BasicSelectOneByQueryTest {
         Account accountDb = accountMapper.selectOneByQuery(queryWrapper);
 
         log.info("BasicSelectOneByQueryTest.testSelectOneByQuery2.accountDb ==> {}", accountDb);
-        
+
         Assertions.assertNotNull(accountDb);
         Assertions.assertNotNull(accountDb.getId());
         Assertions.assertNotNull(accountDb.getUserName());

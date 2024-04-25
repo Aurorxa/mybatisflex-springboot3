@@ -1,0 +1,12 @@
+group = 'com.github'
+version = '1.0'
+
+// 指定注解处理器的输出目录
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
+}
+
+dependencies {
+
+}
+

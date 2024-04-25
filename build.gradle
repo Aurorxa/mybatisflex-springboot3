@@ -1,151 +1,179 @@
-plugins {
-    id 'java'
-    id 'idea'
-    id "java-library"
-    id 'org.springframework.boot' version '3.2.5'
-    id "com.palantir.java-format-idea" version "2.38.0"
-    id 'io.spring.dependency-management' version '1.1.4'
-    id "io.freefair.lombok" version "8.6"
-    id 'jacoco'
-}
+description '父工程'
+buildscript {
 
-group = 'com.github'
-version = '0.0.1'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-//        vendor = JvmVendorSpec.ORACLE
+    ext {
+        springBootVersion = '3.2.5'
+        javaFormatVersion = '2.43.0'
+        freeFairLombokVersion = '8.6'
     }
-}
 
-sourceSets { // 建立源代码的目录集合
-    main {
-        java {
-            srcDirs = ['src/main/java']
+    // 设置仓库
+    repositories {
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
         }
-        resources {
-            srcDirs = ['src/main/resources']
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+    }
+
+    // 依赖
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("com.palantir.javaformat:gradle-palantir-java-format:${javaFormatVersion}")
+        classpath("io.freefair.gradle:lombok-plugin:${freeFairLombokVersion}")
+    }
+}
+
+// 全局项目配置
+allprojects {
+    // 项目的 G 和 V
+    group 'com.github'
+    version '1.0'
+
+    // 设置编码信息
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+    }
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = "UTF-8"
+    }
+
+    // 设置仓库
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.palantir.java-format-idea'
+
+// 配置所有的子模块
+subprojects { project ->
+    if (project.path == ':mysql' || project.path == ':pgsql') {
+        println "project ==> ${project.path}"
+        return
+    }
+    // 添加插件
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'io.freefair.lombok'
+    apply plugin: 'jacoco'
+
+    // 设置 JDK
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    // 指定注解处理器的输出目录
+    tasks.withType(JavaCompile).configureEach {
+        options.getGeneratedSourceOutputDirectory().set(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
         }
     }
-    test {
-        java {
-            srcDirs = ['src/test/java']
+
+    ext {
+        set('testcontainers.version', "1.19.7")
+
+        versions = [
+                mybatisFlex: '1.8.8',
+                mybatis: '3.0.3'
+        ]
+    }
+    // 公用的依赖
+    dependencies {
+        /* JPA */
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        /* JDBC */
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        /* web */
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        /* mybatis */
+        implementation "com.mybatis-flex:mybatis-flex-spring-boot-starter:${versions.mybatisFlex}"
+        annotationProcessor "com.mybatis-flex:mybatis-flex-processor:${versions.mybatisFlex}"
+        implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatis}"
+        testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${versions.mybatis}"
+        /* lombok */
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+        /* MySQL 数据库驱动 */
+        runtimeOnly 'com.mysql:mysql-connector-j'
+        /* yaml 配置提示 */
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        /* 单元测试 */
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        /* testcontainers */
+        testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+        testImplementation 'org.testcontainers:mysql'
+        testImplementation 'org.testcontainers:postgresql'
+        testImplementation 'org.testcontainers:junit-jupiter'
+        /* WEBAPI 测试 */
+        testImplementation 'io.rest-assured:rest-assured'
+        /* 异步线程测试 */
+        testImplementation 'org.awaitility:awaitility'
+        /* devtools */
+        testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
+        /* SQL 美化 */
+        implementation 'com.github.vertical-blank:sql-formatter:2.0.5'
+        /* SQL 解析 */
+        implementation 'com.github.jsqlparser:jsqlparser:4.9'
+    }
+
+    // 相当于 Maven 的 <DependencyManagement> 标签
+    dependencyManagement {
+        imports {
+
         }
-        resources {
-            srcDirs = ['src/test/resources']
+        dependencies {
+
+        }
+    }
+    jar {
+        enabled = false
+    }
+
+    idea {
+        module {
+            generatedSourceDirs = []
+        }
+    }
+    tasks.named('test') {
+        useJUnitPlatform()
+        testLogging {
+            events = ["PASSED", "FAILED", "SKIPPED"]
+            showStandardStreams = true
+            exceptionFormat = "full"
+        }
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        dependsOn test // 确保JaCoCo报告在测试任务之后运行
+        reports {
+            xml.required = true // 启用XML格式的报告
+            html.required = true // 启用HTML格式的报告
+            csv.required = false // 如果需要，可以启用CSV格式的报告
+        }
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        '**/Application*.class', // 排除 Spring Boot 的主类
+                        // 可以添加其他想要排除的类或路径
+                ])
+            }))
         }
     }
 }
 
-// 指定注解处理器的输出目录
-tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
-}
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
 
-repositories {
-    maven {
-        url 'https://maven.aliyun.com/repository/public/'
-    }
-    maven {
-        url 'https://maven.aliyun.com/repository/central'
-    }
-    mavenLocal()
-    mavenCentral()
-}
 
-ext {
-    set('testcontainers.version', "1.19.7")
 
-    versions = [
-            mybatisFlex: '1.8.8',
-            mybatis: '3.0.3'
-    ]
-}
 
-dependencies {
-    /* JPA */
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    /* JDBC */
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    /* web */
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    /* mybatis */
-    implementation "com.mybatis-flex:mybatis-flex-spring-boot-starter:${versions.mybatisFlex}"
-    annotationProcessor "com.mybatis-flex:mybatis-flex-processor:${versions.mybatisFlex}"
-    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatis}"
-    testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${versions.mybatis}"
-    /* lombok */
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-    /* MySQL 数据库驱动 */
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    /* yaml 配置提示 */
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    /* 单元测试 */
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    /* testcontainers */
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:mysql'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    /* WEBAPI 测试 */
-    testImplementation 'io.rest-assured:rest-assured'
-    /* 异步线程测试 */
-    testImplementation 'org.awaitility:awaitility'
-    /* devtools */
-    testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
-    /* SQL 美化 */
-    implementation 'com.github.vertical-blank:sql-formatter:2.0.5'
-    /* SQL 解析 */
-    implementation 'com.github.jsqlparser:jsqlparser:4.9'
-}
-
-jar {
-    enabled = false
-}
-
-idea {
-    module {
-        generatedSourceDirs = []
-    }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    testLogging {
-        events = ["PASSED", "FAILED", "SKIPPED"]
-        showStandardStreams = true
-        exceptionFormat = "full"
-    }
-    finalizedBy jacocoTestReport
-}
-
-//tasks.withType(JavaCompile).configureEach {
-//    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-//}
-
-jacocoTestReport {
-    dependsOn test // 确保JaCoCo报告在测试任务之后运行
-    reports {
-        xml.required = true // 启用XML格式的报告
-        html.required = true // 启用HTML格式的报告
-        csv.required = false // 如果需要，可以启用CSV格式的报告
-    }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    '**/Application*.class', // 排除 Spring Boot 的主类
-                    // 可以添加其他想要排除的类或路径
-            ])
-        }))
-    }
-}

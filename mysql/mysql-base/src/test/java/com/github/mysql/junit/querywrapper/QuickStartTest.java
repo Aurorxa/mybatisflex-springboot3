@@ -1,6 +1,9 @@
 package com.github.mysql.junit.querywrapper;
 
 import com.github.domain.Account;
+import com.github.domain.table.AccountRoleTableDef;
+import com.github.domain.table.AccountTableDef;
+import com.github.domain.table.RoleTableDef;
 import com.github.vertical_blank.sqlformatter.SqlFormatter;
 import com.mybatisflex.core.query.If;
 import com.mybatisflex.core.query.QueryMethods;
@@ -10,10 +13,6 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static com.github.domain.table.AccountRoleTableDef.ACCOUNT_ROLE;
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-import static com.github.domain.table.RoleTableDef.ROLE;
 
 @Slf4j
 class QuickStartTest {
@@ -41,20 +40,20 @@ class QuickStartTest {
     void testSimple() {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
-                .select(ACCOUNT.ALL_COLUMNS, ROLE.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .leftJoin(ACCOUNT_ROLE)
-                .on(ACCOUNT.ID.eq(ACCOUNT_ROLE.ACCOUNT_ID))
-                .leftJoin(ROLE)
-                .on(ACCOUNT_ROLE.ROLE_ID.eq(ROLE.ID))
-                .where(ACCOUNT.ID.ge(1))
-                .groupBy(ACCOUNT.AGE)
-                .having(ACCOUNT.GENDER.in(1, 2))
-                .orderBy(ACCOUNT.ID.desc())
+                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS, RoleTableDef.ROLE.ALL_COLUMNS)
+                .from(AccountTableDef.ACCOUNT)
+                .leftJoin(AccountRoleTableDef.ACCOUNT_ROLE)
+                .on(AccountTableDef.ACCOUNT.ID.eq(AccountRoleTableDef.ACCOUNT_ROLE.ACCOUNT_ID))
+                .leftJoin(RoleTableDef.ROLE)
+                .on(AccountRoleTableDef.ACCOUNT_ROLE.ROLE_ID.eq(RoleTableDef.ROLE.ID))
+                .where(AccountTableDef.ACCOUNT.ID.ge(1))
+                .groupBy(AccountTableDef.ACCOUNT.AGE)
+                .having(AccountTableDef.ACCOUNT.GENDER.in(1, 2))
+                .orderBy(AccountTableDef.ACCOUNT.ID.desc())
                 .union(QueryWrapper
                         .create()
-                        .select(ACCOUNT.ALL_COLUMNS)
-                        .from(ACCOUNT))
+                        .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
+                        .from(AccountTableDef.ACCOUNT))
                 .limit(10);
 
         String sql = """
@@ -88,7 +87,7 @@ class QuickStartTest {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
                 .select()
-                .from(ACCOUNT);
+                .from(AccountTableDef.ACCOUNT);
 
         // 可能为 Null 或 ""
         String userName = "张三";
@@ -98,7 +97,7 @@ class QuickStartTest {
                 .trim()
                 .isEmpty();
 
-        queryWrapper.where(flag ? ACCOUNT.USER_NAME.eq(userName) : QueryMethods.noCondition());
+        queryWrapper.where(flag ? AccountTableDef.ACCOUNT.USER_NAME.eq(userName) : QueryMethods.noCondition());
 
         String sql = """
                 SELECT
@@ -121,7 +120,7 @@ class QuickStartTest {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
                 .select()
-                .from(ACCOUNT);
+                .from(AccountTableDef.ACCOUNT);
 
         // 可能为 Null 或 ""
         String userName = "张三";
@@ -131,7 +130,7 @@ class QuickStartTest {
                 .trim()
                 .isEmpty();
 
-        queryWrapper.where(ACCOUNT.USER_NAME
+        queryWrapper.where(AccountTableDef.ACCOUNT.USER_NAME
                 .eq(userName)
                 .when(flag));
 
@@ -155,12 +154,12 @@ class QuickStartTest {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
                 .select()
-                .from(ACCOUNT);
+                .from(AccountTableDef.ACCOUNT);
 
         // 可能为 Null 或 ""
         String userName = "张三";
 
-        queryWrapper.where(ACCOUNT.USER_NAME
+        queryWrapper.where(AccountTableDef.ACCOUNT.USER_NAME
                 .eq(userName)
                 .when(() -> If.hasText(userName)));
 
@@ -183,12 +182,12 @@ class QuickStartTest {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
                 .select()
-                .from(ACCOUNT);
+                .from(AccountTableDef.ACCOUNT);
 
         // 可能为 Null 或 ""
         String userName = "";
 
-        queryWrapper.where(ACCOUNT.USER_NAME
+        queryWrapper.where(AccountTableDef.ACCOUNT.USER_NAME
                 .eq(userName, If::hasText)
                 .when(() -> If.hasText(userName)));
 
@@ -208,9 +207,9 @@ class QuickStartTest {
     void testFunction() {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
-                .select(QueryMethods.concat(ACCOUNT.USER_NAME, QueryMethods.string("123")))
-                .from(ACCOUNT)
-                .where(QueryMethods.not(ACCOUNT.GENDER.eq(3)));
+                .select(QueryMethods.concat(AccountTableDef.ACCOUNT.USER_NAME, QueryMethods.string("123")))
+                .from(AccountTableDef.ACCOUNT)
+                .where(QueryMethods.not(AccountTableDef.ACCOUNT.GENDER.eq(3)));
 
         String sql = """
                 SELECT

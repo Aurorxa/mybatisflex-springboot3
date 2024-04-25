@@ -2,8 +2,8 @@ package com.github.mysql.junit.basic.delete;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
-import com.mybatisflex.core.query.QueryCondition;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -16,15 +16,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Map;
 import java.util.Random;
-
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
 
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicDeleteByConditionTest {
+class BasicDeleteByMapTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -32,7 +31,7 @@ class BasicDeleteByConditionTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testDeleteByCondition() {
+    void testDeleteByMap() {
         // 新增数据
         Account account = new Account();
         account.setId(Math.abs(new Random().nextLong()));
@@ -45,14 +44,13 @@ class BasicDeleteByConditionTest {
         Assertions.assertNotNull(accountDb);
 
         /*
-          删除数据，这种方式可以组合任意条件
+          删除数据，这种方式只能用于 = ，需要注意的是，这种方式需要拼接实际数据库的字段名，而非实体类的属性名
 
-          DELETE FROM `tb_account` WHERE `user_name` = ? AND `age` = ?
+          DELETE FROM `tb_account`
+          WHERE `tb_account`.`user_name` = 'abc'
          */
-        QueryCondition queryCondition = ACCOUNT.USER_NAME
-                .eq("abc")
-                .and(ACCOUNT.AGE.eq(18));
-        int size = accountMapper.deleteByCondition(queryCondition);
+        Map<String, Object> whereCondition = Map.of(AccountTableDef.ACCOUNT.USER_NAME.getName(), "abc");
+        int size = accountMapper.deleteByMap(whereCondition);
         Assertions.assertEquals(1, size);
 
         // 查询数据

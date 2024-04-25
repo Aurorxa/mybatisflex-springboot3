@@ -2,6 +2,7 @@ package com.github.mysql.junit.quick;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -20,8 +21,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.Date;
 import java.util.List;
-
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
 
 @Slf4j
 @Transactional
@@ -79,9 +78,9 @@ class QuickStartTest {
     void testQuickQuery() {
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.AGE.ge(18));
+                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
+                .from(AccountTableDef.ACCOUNT)
+                .where(AccountTableDef.ACCOUNT.AGE.ge(18));
 
         Account account = accountMapper.selectOneByQuery(queryWrapper);
 

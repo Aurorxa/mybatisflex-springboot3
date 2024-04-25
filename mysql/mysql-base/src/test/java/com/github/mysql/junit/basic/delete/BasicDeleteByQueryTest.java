@@ -2,6 +2,7 @@ package com.github.mysql.junit.basic.delete;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -17,8 +18,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.Random;
-
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
 
 @Slf4j
 @Transactional
@@ -52,10 +51,10 @@ class BasicDeleteByQueryTest {
          */
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.USER_NAME.eq("abc"))
-                .and(ACCOUNT.AGE.eq(18));
+                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
+                .from(AccountTableDef.ACCOUNT)
+                .where(AccountTableDef.ACCOUNT.USER_NAME.eq("abc"))
+                .and(AccountTableDef.ACCOUNT.AGE.eq(18));
         int size = accountMapper.deleteByQuery(queryWrapper);
         Assertions.assertEquals(1, size);
 

@@ -2,6 +2,7 @@ package com.github.mysql.junit.basic.delete;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -19,13 +20,11 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicDeleteBatchByIdsTest {
+class BasicDeleteBatchByIds2Test {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -55,22 +54,22 @@ class BasicDeleteBatchByIdsTest {
         /*
           删除数据
 
-          DELETE FROM `tb_account`
-          WHERE `id` = ? OR `id` = ? OR `id` = ? OR `id` = ?
+          DELETE FROM `tb_account` WHERE `id` = ? OR `id` = ?
+          DELETE FROM `tb_account` WHERE `id` = ? OR `id` = ?
          */
         List<Long> idsArray = accountDbList
                 .stream()
                 .map(Account::getId)
                 .toList();
-        int size = accountMapper.deleteBatchByIds(idsArray);
+        int size = accountMapper.deleteBatchByIds(idsArray, 2);
         Assertions.assertEquals(4, size);
 
         // 查询数据
         QueryWrapper queryWrapper = QueryWrapper
                 .create()
-                .select(ACCOUNT.ALL_COLUMNS)
-                .from(ACCOUNT)
-                .where(ACCOUNT.USER_NAME.in(List.of("a", "b", "c", "d")));
+                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
+                .from(AccountTableDef.ACCOUNT)
+                .where(AccountTableDef.ACCOUNT.USER_NAME.in(List.of("a", "b", "c", "d")));
         accountDbList = accountMapper.selectListByQuery(queryWrapper);
         Assertions.assertEquals(0, accountDbList.size());
     }

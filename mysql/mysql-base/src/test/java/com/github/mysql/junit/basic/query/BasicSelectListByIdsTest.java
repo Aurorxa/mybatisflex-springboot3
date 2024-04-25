@@ -2,8 +2,11 @@ package com.github.mysql.junit.basic.query;
 
 import com.github.Application;
 import com.github.domain.Account;
+import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
-import com.mybatisflex.core.query.QueryCondition;
+import com.github.vo.AccountVo;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -19,13 +22,11 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.domain.table.AccountTableDef.ACCOUNT;
-
 @Slf4j
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class BasicSelectCountByConditionTest {
+class BasicSelectListByIdsTest {
 
     @Container
     @ServiceConnection
@@ -34,51 +35,58 @@ class BasicSelectCountByConditionTest {
     private AccountMapper accountMapper;
 
     @Test
-    void testSelectCountByCondition() {
+    void testSelectListByIds() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account()
                 .setUserName("a")
                 .setAge(17));
         accountList.add(new Account()
                 .setUserName("b")
-                .setAge(20));
+                .setAge(19));
         accountList.add(new Account()
                 .setUserName("c")
                 .setAge(20));
         accountList.add(new Account()
                 .setUserName("d")
-                .setAge(20));
+                .setAge(21));
         accountList.add(new Account()
                 .setUserName("e")
                 .setAge(22));
-        accountList.add(new Account()
-                .setUserName("f")
-                .setAge(22));
-        accountList.add(new Account()
-                .setUserName("g")
-                .setAge(20));
-        accountList.add(new Account()
-                .setUserName("h")
-                .setAge(20));
 
-        int size = accountMapper.insertBatch(accountList);
-        log.info("BasicSelectCountByConditionTest.testSelectCountByCondition.size ==> {}", size);
+        accountMapper.insertBatch(accountList);
 
+        QueryWrapper queryWrapper = QueryWrapper
+                .create()
+                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS, QueryMethods
+                        .if_(AccountTableDef.ACCOUNT.AGE.ge(18), QueryMethods.true_(), QueryMethods.false_())
+                        .as("is_audit"))
+                .where(AccountTableDef.ACCOUNT.USER_NAME.in("a", "b", "c", "d", "e"));
         /*
          * 查询数据
          *
-         * SELECT `age`
+         * SELECT *, IF(`age` >= ?, TRUE, FALSE) AS `is_audit`
          * FROM `tb_account`
-         * WHERE `age` >= ?
+         * WHERE `user_name` IN (?, ?, ?, ?, ?)
          */
+        List<AccountVo> accountVoList = accountMapper.selectListByQueryAs(queryWrapper, AccountVo.class);
 
-        QueryCondition queryCondition = ACCOUNT.AGE.ge(20);
+        log.info("BasicSelectOneByEntityIdTest.testSelectOneByEntityId.accountVoList ==> {}", accountVoList);
 
-        long count = accountMapper.selectCountByCondition(queryCondition);
+        Assertions.assertNotNull(accountVoList);
+        Assertions.assertEquals(accountList.size(), accountVoList.size());
 
-        log.info("BasicSelectCountByConditionTest.testSelectCountByCondition.count==> {}", count);
 
-        Assertions.assertEquals(7, count);
+        List<Long> idList = accountVoList
+                .stream()
+                .map(AccountVo::getId)
+                .toList();
+        List<Account> accountDbList = accountMapper.selectListByIds(idList);
+
+        log.info("BasicSelectOneByEntityIdTest.testSelectOneByEntityId.accountDbList ==> {}", accountDbList);
+
+        Assertions.assertNotNull(accountDbList);
+        Assertions.assertEquals(accountList.size(), accountDbList.size());
+
     }
 
 
