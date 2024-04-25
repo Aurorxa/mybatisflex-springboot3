@@ -33,7 +33,6 @@ public class Account {
 
     private BigDecimal money;
 
-
     @RelationManyToMany(
             joinTable = "tb_account_role", // 中间表
             selfField = "id", joinSelfColumn = "account_id",

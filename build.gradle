@@ -105,6 +105,8 @@ dependencies {
     testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
     /* SQL 美化 */
     implementation 'com.github.vertical-blank:sql-formatter:2.0.5'
+    /* SQL 解析 */
+    implementation 'com.github.jsqlparser:jsqlparser:4.9'
 }
 
 jar {
@@ -126,6 +128,10 @@ tasks.named('test') {
     }
     finalizedBy jacocoTestReport
 }
+
+//tasks.withType(JavaCompile).configureEach {
+//    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+//}
 
 jacocoTestReport {
     dependsOn test // 确保JaCoCo报告在测试任务之后运行
