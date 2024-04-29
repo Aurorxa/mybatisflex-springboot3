@@ -4,18 +4,18 @@ import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
 import jakarta.annotation.Resource;
+import java.util.Objects;
+import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.Random;
 
 @Slf4j
 @Transactional
@@ -24,11 +24,34 @@ import java.util.Random;
 class BasicInsertWithPk2Test {
     // 随机数的上限
     private static final Long upperBound = 100_000_000_000L;
+
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
+
     @Resource
     private AccountMapper accountMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @Test
     void testInsertWithPk1() {
@@ -38,11 +61,11 @@ class BasicInsertWithPk2Test {
         account.setAge(18);
 
         /*
-           不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
+          不忽略 NULL 值，即数据库中有默认值设置，也会插入 NULL
 
-           INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
-           VALUES ('abc', 18, null, null, null)
-         */
+          INSERT INTO `tb_account`(`user_name`, `age`, `birthday`, `create_time`, `update_time`)
+          VALUES ('abc', 18, null, null, null)
+        */
         accountMapper.insertWithPk(account, false); // 相当于 insertWithPk()
 
         Assertions.assertNotNull(account);

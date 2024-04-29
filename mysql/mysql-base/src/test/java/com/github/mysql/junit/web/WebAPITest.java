@@ -1,27 +1,30 @@
 package com.github.mysql.junit.web;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasSize;
+
 import com.github.Application;
 import com.github.dao.CustomerRepository;
 import com.github.domain.Customer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import jakarta.annotation.Resource;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.List;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.hasSize;
 
 @Slf4j
 @Transactional
@@ -38,10 +41,26 @@ class WebAPITest {
     @Resource
     private CustomerRepository customerRepository;
 
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
 
     @BeforeEach
-    void beforeEach() {
+    void setUp(TestInfo testInfo) {
         RestAssured.baseURI = "http://localhost:" + port;
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
     }
 
     @Test
@@ -49,13 +68,11 @@ class WebAPITest {
         List<Customer> all = customerRepository.findAll();
         log.info("ApplicationTest.test ==> {}", all);
 
-        given()
-                .contentType(ContentType.JSON)
+        given().contentType(ContentType.JSON)
                 .when()
                 .get("/api/customers")
                 .then()
                 .statusCode(200)
                 .body(".", hasSize(1));
     }
-
 }

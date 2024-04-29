@@ -6,18 +6,18 @@ import com.github.domain.Role;
 import com.github.mapper.AccountMapper;
 import com.github.mapper.RoleMapper;
 import jakarta.annotation.Resource;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.List;
 
 @Slf4j
 @Transactional
@@ -34,6 +34,27 @@ class ApplicationTest {
 
     @Resource
     private RoleMapper roleMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @Test
     void testNoGenericsTypeInsert() {
@@ -96,7 +117,6 @@ class ApplicationTest {
         Assertions.assertNotNull(roleDb.getCreateTime());
     }
 
-
     @Test
     void testGenericsTypeUpdate() {
         // 封装数据
@@ -152,7 +172,5 @@ class ApplicationTest {
 
         // 断言
         Assertions.assertNotNull(accountList);
-
     }
-
 }

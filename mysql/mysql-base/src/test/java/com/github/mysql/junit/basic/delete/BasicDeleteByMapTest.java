@@ -5,19 +5,19 @@ import com.github.domain.Account;
 import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import jakarta.annotation.Resource;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.Map;
-import java.util.Random;
 
 @Slf4j
 @Transactional
@@ -27,8 +27,30 @@ class BasicDeleteByMapTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
+
     @Resource
     private AccountMapper accountMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @Test
     void testDeleteByMap() {
@@ -44,11 +66,11 @@ class BasicDeleteByMapTest {
         Assertions.assertNotNull(accountDb);
 
         /*
-          删除数据，这种方式只能用于 = ，需要注意的是，这种方式需要拼接实际数据库的字段名，而非实体类的属性名
+         删除数据，这种方式只能用于 = ，需要注意的是，这种方式需要拼接实际数据库的字段名，而非实体类的属性名
 
-          DELETE FROM `tb_account`
-          WHERE `tb_account`.`user_name` = 'abc'
-         */
+         DELETE FROM `tb_account`
+         WHERE `tb_account`.`user_name` = 'abc'
+        */
         Map<String, Object> whereCondition = Map.of(AccountTableDef.ACCOUNT.USER_NAME.getName(), "abc");
         int size = accountMapper.deleteByMap(whereCondition);
         Assertions.assertEquals(1, size);
@@ -57,5 +79,4 @@ class BasicDeleteByMapTest {
         accountDb = accountMapper.selectOneById(account.getId());
         Assertions.assertNull(accountDb);
     }
-
 }

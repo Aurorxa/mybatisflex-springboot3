@@ -8,19 +8,19 @@ import com.github.vo.AccountVo;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Transactional
@@ -31,35 +31,48 @@ class BasicSelectListByIdsTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
+
     @Resource
     private AccountMapper accountMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @Test
     void testSelectListByIds() {
         List<Account> accountList = new ArrayList<>();
-        accountList.add(new Account()
-                .setUserName("a")
-                .setAge(17));
-        accountList.add(new Account()
-                .setUserName("b")
-                .setAge(19));
-        accountList.add(new Account()
-                .setUserName("c")
-                .setAge(20));
-        accountList.add(new Account()
-                .setUserName("d")
-                .setAge(21));
-        accountList.add(new Account()
-                .setUserName("e")
-                .setAge(22));
+        accountList.add(new Account().setUserName("a").setAge(17));
+        accountList.add(new Account().setUserName("b").setAge(19));
+        accountList.add(new Account().setUserName("c").setAge(20));
+        accountList.add(new Account().setUserName("d").setAge(21));
+        accountList.add(new Account().setUserName("e").setAge(22));
 
         accountMapper.insertBatch(accountList);
 
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
-                .select(AccountTableDef.ACCOUNT.ALL_COLUMNS, QueryMethods
-                        .if_(AccountTableDef.ACCOUNT.AGE.ge(18), QueryMethods.true_(), QueryMethods.false_())
-                        .as("is_audit"))
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select(
+                        AccountTableDef.ACCOUNT.ALL_COLUMNS,
+                        QueryMethods.if_(
+                                        AccountTableDef.ACCOUNT.AGE.ge(18), QueryMethods.true_(), QueryMethods.false_())
+                                .as("is_audit"))
                 .where(AccountTableDef.ACCOUNT.USER_NAME.in("a", "b", "c", "d", "e"));
         /*
          * 查询数据
@@ -75,19 +88,12 @@ class BasicSelectListByIdsTest {
         Assertions.assertNotNull(accountVoList);
         Assertions.assertEquals(accountList.size(), accountVoList.size());
 
-
-        List<Long> idList = accountVoList
-                .stream()
-                .map(AccountVo::getId)
-                .toList();
+        List<Long> idList = accountVoList.stream().map(AccountVo::getId).toList();
         List<Account> accountDbList = accountMapper.selectListByIds(idList);
 
         log.info("BasicSelectOneByEntityIdTest.testSelectOneByEntityId.accountDbList ==> {}", accountDbList);
 
         Assertions.assertNotNull(accountDbList);
         Assertions.assertEquals(accountList.size(), accountDbList.size());
-
     }
-
-
 }

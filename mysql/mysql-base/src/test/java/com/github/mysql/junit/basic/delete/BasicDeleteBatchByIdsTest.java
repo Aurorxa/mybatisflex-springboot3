@@ -6,19 +6,19 @@ import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Transactional
@@ -28,8 +28,30 @@ class BasicDeleteBatchByIdsTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
+
     @Resource
     private AccountMapper accountMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @Test
     void testDeleteBatchByIds() {
@@ -45,33 +67,25 @@ class BasicDeleteBatchByIdsTest {
         // 查询数据
         List<Account> accountDbList = accountMapper.selectAll();
         Assertions.assertEquals(4, accountDbList.size());
-        Assertions.assertTrue(accountDbList
-                .stream()
-                .map(Account::getUserName)
-                .toList()
-                .contains("a"));
+        Assertions.assertTrue(
+                accountDbList.stream().map(Account::getUserName).toList().contains("a"));
 
         /*
-          删除数据
+         删除数据
 
-          DELETE FROM `tb_account`
-          WHERE `id` = ? OR `id` = ? OR `id` = ? OR `id` = ?
-         */
-        List<Long> idsArray = accountDbList
-                .stream()
-                .map(Account::getId)
-                .toList();
+         DELETE FROM `tb_account`
+         WHERE `id` = ? OR `id` = ? OR `id` = ? OR `id` = ?
+        */
+        List<Long> idsArray = accountDbList.stream().map(Account::getId).toList();
         int size = accountMapper.deleteBatchByIds(idsArray);
         Assertions.assertEquals(4, size);
 
         // 查询数据
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
+        QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
                 .from(AccountTableDef.ACCOUNT)
                 .where(AccountTableDef.ACCOUNT.USER_NAME.in(List.of("a", "b", "c", "d")));
         accountDbList = accountMapper.selectListByQuery(queryWrapper);
         Assertions.assertEquals(0, accountDbList.size());
     }
-
 }

@@ -6,21 +6,19 @@ import com.github.domain.table.AccountTableDef;
 import com.github.mapper.AccountMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Transactional
@@ -34,6 +32,27 @@ class QuickStartTest {
 
     @Resource
     private AccountMapper accountMapper;
+
+    private StopWatch stopWatch;
+
+    private TestInfo currentTestInfo;
+
+    @BeforeEach
+    void setUp(TestInfo testInfo) {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        currentTestInfo = testInfo;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        stopWatch.stop();
+        log.info(
+                "Test 方法：{}  execution time: {} ms ",
+                Objects.requireNonNull(currentTestInfo.getTestMethod().orElse(null))
+                        .getName(),
+                stopWatch.getTotalTimeMillis());
+    }
 
     @BeforeEach
     void setupTestData() {
@@ -57,10 +76,7 @@ class QuickStartTest {
     void cleanup() {
         List<Account> accountList = accountMapper.selectAll();
 
-        List<Long> ids = accountList
-                .stream()
-                .map(Account::getId)
-                .toList();
+        List<Long> ids = accountList.stream().map(Account::getId).toList();
 
         accountMapper.deleteBatchByIds(ids);
     }
@@ -76,8 +92,7 @@ class QuickStartTest {
 
     @Test
     void testQuickQuery() {
-        QueryWrapper queryWrapper = QueryWrapper
-                .create()
+        QueryWrapper queryWrapper = QueryWrapper.create()
                 .select(AccountTableDef.ACCOUNT.ALL_COLUMNS)
                 .from(AccountTableDef.ACCOUNT)
                 .where(AccountTableDef.ACCOUNT.AGE.ge(18));
@@ -88,5 +103,4 @@ class QuickStartTest {
 
         Assertions.assertNotNull(account);
     }
-
 }
