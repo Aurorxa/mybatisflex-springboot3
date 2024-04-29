@@ -9,4 +9,6 @@ include 'mysql:mysql-relations-query'
 findProject(':mysql:mysql-relations-query')?.name = 'mysql-relations-query'
 include 'mysql:mysql-enums'
 findProject(':mysql:mysql-enums')?.name = 'mysql-enums'
+include 'mysql:mysql-logic-delete'
+findProject(':mysql:mysql-logic-delete')?.name = 'mysql-logic-delete'
 

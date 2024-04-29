@@ -1,10 +1,7 @@
 package com.github.domain;
 
 import com.github.enums.AccountGradeEnum;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.RelationManyToMany;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -29,8 +26,10 @@ public class Account {
 
     private AccountGradeEnum grade;
 
+    @Column(onInsertValue = "now()")
     private Date createTime;
 
+    @Column(onInsertValue = "now()", onUpdateValue = "now()")
     private Date updateTime;
 
     private BigDecimal money;

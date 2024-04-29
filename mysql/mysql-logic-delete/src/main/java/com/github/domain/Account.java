@@ -1,9 +1,7 @@
 package com.github.domain;
 
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.RelationManyToMany;
-import com.mybatisflex.annotation.Table;
+import com.github.enums.AccountGradeEnum;
+import com.mybatisflex.annotation.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +9,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
-@Table("tb_account")
+@Table(value = "tb_account")
 @Accessors(chain = true)
 public class Account {
 
@@ -20,14 +18,21 @@ public class Account {
 
     private String userName;
 
+    private String password;
+
     private Integer age;
 
     private Date birthday;
 
-    private Integer grade;
+    private AccountGradeEnum grade;
 
+    @Column(isLogicDelete = true)
+    private Boolean beenDeleted;
+
+    @Column(onInsertValue = "now()")
     private Date createTime;
 
+    @Column(onInsertValue = "now()", onUpdateValue = "now()")
     private Date updateTime;
 
     private BigDecimal money;
