@@ -3,7 +3,6 @@ package com.github.listerner;
 import com.github.domain.Account;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
-
 import java.util.Date;
 
 public class AccountListener implements InsertListener, UpdateListener {
@@ -19,6 +18,5 @@ public class AccountListener implements InsertListener, UpdateListener {
         Account account = (Account) entity;
         account.setGender(2);
         account.setUpdateTime(new Date());
-
     }
 }

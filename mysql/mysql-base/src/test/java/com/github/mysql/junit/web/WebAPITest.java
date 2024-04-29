@@ -42,7 +42,6 @@ class WebAPITest {
     private CustomerRepository customerRepository;
 
     private StopWatch stopWatch;
-
     private TestInfo currentTestInfo;
 
     @BeforeEach
@@ -65,8 +64,16 @@ class WebAPITest {
 
     @Test
     void test() {
+
+        Customer customer = new Customer();
+        customer.setEmail("123456789@qq.com");
+        customer.setName("你大爷的");
+
+        Customer customerDb = customerRepository.save(customer);
+        log.info("ApplicationTest.test.customerDb ==> {}", customerDb);
+
         List<Customer> all = customerRepository.findAll();
-        log.info("ApplicationTest.test ==> {}", all);
+        log.info("ApplicationTest.test.all ==> {}", all);
 
         given().contentType(ContentType.JSON)
                 .when()

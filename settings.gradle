@@ -7,4 +7,6 @@ include 'mysql:mysql-querywrapper'
 findProject(':mysql:mysql-querywrapper')?.name = 'mysql-querywrapper'
 include 'mysql:mysql-relations-query'
 findProject(':mysql:mysql-relations-query')?.name = 'mysql-relations-query'
+include 'mysql:mysql-enums'
+findProject(':mysql:mysql-enums')?.name = 'mysql-enums'
 
