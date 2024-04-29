@@ -50,23 +50,18 @@ class QuickStartTest {
 
         String sql =
                 """
-                ( SELECT
-                `tb_account`.*,
-                `tb_role`.*
-                FROM
-                	`tb_account`
-                	LEFT JOIN `tb_account_role` ON `tb_account`.`id` = `tb_account_role`.`account_id`
-                	LEFT JOIN `tb_role` ON `tb_account_role`.`role_id` = `tb_role`.`id`
-                WHERE
-                	`tb_account`.`id` >= 1
-                GROUP BY
-                	`tb_account`.`age`
-                HAVING
-                	`tb_account`.`gender` IN ( 1, 2 )
-                ORDER BY
-                	`tb_account`.`id` DESC
-                ) UNION
-                ( SELECT * FROM `tb_account` )
+                (SELECT `tb_account`.`id` AS `tb_account$id`, `tb_account`.`age`, `tb_account`.`money`, `tb_account`.`gender`, `tb_account`.`birthday`, `tb_account`.`user_name`, `tb_account`.`create_time` AS `tb_account$create_time`, `tb_account`.`update_time` AS `tb_account$update_time`, `tb_role`.`id` AS `tb_role$id`, `tb_role`.`role_name`, `tb_role`.`create_time` AS `tb_role$create_time`, `tb_role`.`update_time` AS `tb_role$update_time`
+                FROM `tb_account`
+                LEFT JOIN `tb_account_role`
+                ON `tb_account`.`id` = `tb_account_role`.`account_id`
+                LEFT JOIN `tb_role`
+                ON `tb_account_role`.`role_id` = `tb_role`.`id`
+                WHERE `tb_account`.`id` >= 1
+                GROUP BY `tb_account`.`age`
+                HAVING `tb_account`.`gender` IN (1, 2)
+                ORDER BY `tb_account`.`id` DESC)
+                UNION
+                (SELECT * FROM `tb_account`)
                 LIMIT 10""";
 
         log.info("QuickStartTest.testSimple {}", queryWrapper.toSQL());
