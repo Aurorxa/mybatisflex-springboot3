@@ -13,4 +13,6 @@ include 'mysql:mysql-logic-delete'
 findProject(':mysql:mysql-logic-delete')?.name = 'mysql-logic-delete'
 include 'mysql:mysql-version'
 findProject(':mysql:mysql-version')?.name = 'mysql-version'
+include 'mysql:mysql-tenantId'
+findProject(':mysql:mysql-tenantId')?.name = 'mysql-tenantId'
 
