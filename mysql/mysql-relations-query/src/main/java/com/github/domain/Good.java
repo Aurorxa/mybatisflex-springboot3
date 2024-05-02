@@ -6,15 +6,22 @@ import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 @Data
-@Table("tb_account_role")
+@Table("tb_good")
 @Accessors(chain = true)
-public class AccountRole {
+public class Good {
 
     @Id(keyType = KeyType.Auto)
     private Long id;
 
+    private String goodName;
+
+    private Date createTime;
+
+    private Date updateTime;
+
     private Long accountId;
 
-    private Long roleId;
 }

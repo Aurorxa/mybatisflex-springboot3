@@ -84,8 +84,6 @@ class ApplicationTest {
                 .all()  // 这将打印出响应的详细信息
                 .statusCode(200);  // 检查状态码，确保数据已成功添加
 
-
-
         /*
          * 查询流程
          */
