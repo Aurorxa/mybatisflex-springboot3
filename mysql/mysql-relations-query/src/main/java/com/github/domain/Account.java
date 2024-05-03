@@ -1,14 +1,12 @@
 package com.github.domain;
 
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.RelationManyToMany;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 @Data
 @Table("tb_account")
@@ -38,5 +36,9 @@ public class Account {
             joinSelfColumn = "account_id",
             targetField = "id",
             joinTargetColumn = "role_id")
-    private List<Role> role;
+    private List<Role> roleList;
+
+    @RelationOneToMany(selfField = "id", targetField = "accountId")
+    private List<Order> orderList;
+
 }
