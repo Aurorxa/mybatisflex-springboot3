@@ -3,6 +3,8 @@ package com.github.junit;
 import com.github.Application;
 import com.github.domain.Account;
 import com.github.mapper.AccountMapper;
+import com.mybatisflex.core.row.BatchArgsSetter;
+import com.mybatisflex.core.row.Db;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import org.testcontainers.utility.DockerImageName;
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class InsertBatchTest {
+class ApplicationTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
@@ -52,7 +54,7 @@ class InsertBatchTest {
     }
 
     @Test
-    void test() {
+    void testInsertBatch() {
         List<Account> accountList = new ArrayList<>();
         accountList.add(new Account().setUserName("a"));
         accountList.add(new Account().setUserName("b"));
@@ -62,8 +64,54 @@ class InsertBatchTest {
 
         int size = accountMapper.insertBatch(accountList);
 
-        log.info("InsertBatchTest.test.size ==> {}", size);
+        log.info("ApplicationTest.testInsertBatch.size ==> {}", size);
 
         Assertions.assertEquals(accountList.size(), size);
+    }
+
+    @Test
+    void testExecuteUpdate() {
+        List<Account> accountList = new ArrayList<>();
+        accountList.add(new Account().setUserName("a"));
+        accountList.add(new Account().setUserName("b"));
+        accountList.add(new Account().setUserName("c"));
+        accountList.add(new Account().setUserName("d"));
+        accountList.add(new Account().setUserName("e"));
+
+        Db.executeBatch(accountList, AccountMapper.class, AccountMapper::insertSelective);
+
+        log.info("ApplicationTest.testExecuteUpdate.accountList ==> {}", accountList);
+
+        Assertions.assertNotNull(accountList.get(0).getId());
+    }
+
+    @Test
+    void testUpdateBatch() {
+        String sql = """
+           UPDATE tb_account SET user_name = ? WHERE id = ?
+           """;
+
+        List<Object[]> paramsList = new ArrayList<>();
+        paramsList.add(new Object[] {"a", 1L});
+        paramsList.add(new Object[] {"b", 2L});
+        paramsList.add(new Object[] {"c", 3L});
+
+        int[] intArr = Db.updateBatch(sql, new BatchArgsSetter() {
+            @Override
+            public int getBatchSize() {
+                return paramsList.size();
+            }
+
+            @Override
+            public Object[] getSqlArgs(int index) {
+                return paramsList.get(index);
+            }
+        });
+
+        Assertions.assertNotNull(intArr);
+
+        Assertions.assertEquals(3, intArr.length);
+
+        log.info("ApplicationTest.testUpdateBatch.ints ==> {}", intArr);
     }
 }

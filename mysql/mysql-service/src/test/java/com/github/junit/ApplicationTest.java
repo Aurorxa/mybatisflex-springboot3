@@ -1,12 +1,9 @@
 package com.github.junit;
 
 import com.github.Application;
-import com.github.mapper.AccountMapper;
-import com.mybatisflex.core.row.BatchArgsSetter;
-import com.mybatisflex.core.row.Db;
+import com.github.domain.Account;
+import com.github.service.AccountService;
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -23,17 +20,17 @@ import org.testcontainers.utility.DockerImageName;
 @Transactional
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-class UpdateBatchTest {
+class ApplicationTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
 
-    @Resource
-    private AccountMapper accountMapper;
-
     private StopWatch stopWatch;
 
     private TestInfo currentTestInfo;
+
+    @Resource
+    private AccountService accountService;
 
     @BeforeEach
     void setUp(TestInfo testInfo) {
@@ -54,31 +51,9 @@ class UpdateBatchTest {
 
     @Test
     void test() {
-        String sql = """
-            UPDATE tb_account SET user_name = ? WHERE id = ?
-            """;
-
-        List<Object[]> paramsList = new ArrayList<>();
-        paramsList.add(new Object[] {"a", 1L});
-        paramsList.add(new Object[] {"b", 2L});
-        paramsList.add(new Object[] {"c", 3L});
-
-        int[] intArr = Db.updateBatch(sql, new BatchArgsSetter() {
-            @Override
-            public int getBatchSize() {
-                return paramsList.size();
-            }
-
-            @Override
-            public Object[] getSqlArgs(int index) {
-                return paramsList.get(index);
-            }
-        });
-
-        Assertions.assertNotNull(intArr);
-
-        Assertions.assertEquals(3, intArr.length);
-
-        log.info("UpdateBatchTest.test.ints ==> {}", intArr);
+        Account account = new Account().setUserName("abc");
+        boolean flag = accountService.save(account);
+        Assertions.assertTrue(flag);
+        Assertions.assertNotNull(account.getId());
     }
 }
