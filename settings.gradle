@@ -21,4 +21,6 @@ include 'mysql:mysql-db-row'
 findProject(':mysql:mysql-db-row')?.name = 'mysql-db-row'
 include 'mysql:mysql-batch'
 findProject(':mysql:mysql-batch')?.name = 'mysql-batch'
+include 'mysql:mysql-service'
+findProject(':mysql:mysql-service')?.name = 'mysql-service'
 

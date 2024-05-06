@@ -23,7 +23,7 @@ public class Account {
 
     private Integer gender;
 
-    @Column("now()")
+    @Column(onInsertValue = "now()")
     private Date createTime;
 
     private Date updateTime;
