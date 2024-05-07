@@ -23,4 +23,6 @@ include 'mysql:mysql-batch'
 findProject(':mysql:mysql-batch')?.name = 'mysql-batch'
 include 'mysql:mysql-service'
 findProject(':mysql:mysql-service')?.name = 'mysql-service'
+include 'mysql:mysql-chain'
+findProject(':mysql:mysql-chain')?.name = 'mysql-chain'
 
