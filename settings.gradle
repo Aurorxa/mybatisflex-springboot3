@@ -25,4 +25,6 @@ include 'mysql:mysql-service'
 findProject(':mysql:mysql-service')?.name = 'mysql-service'
 include 'mysql:mysql-chain'
 findProject(':mysql:mysql-chain')?.name = 'mysql-chain'
+include 'mysql:mysql-datasource'
+findProject(':mysql:mysql-datasource')?.name = 'mysql-datasource'
 
