@@ -81,7 +81,7 @@ subprojects { project ->
         set('testcontainers.version', "1.19.7")
 
         versions = [
-                mybatisFlex: '1.8.8',
+                mybatisFlex: '1.8.9',
                 mybatis: '3.0.3'
         ]
     }
