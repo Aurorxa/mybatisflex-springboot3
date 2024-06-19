@@ -1,6 +1,5 @@
 description '父工程'
 buildscript {
-
     ext {
         springBootVersion = '3.2.5'
         javaFormatVersion = '2.43.0'
@@ -27,8 +26,8 @@ buildscript {
 // 全局项目配置
 allprojects {
     // 项目的 G 和 V
-    group 'com.github'
-    version '1.0'
+    group = 'com.github'
+    version = '1.0'
 
     // 设置编码信息
     tasks.withType(JavaCompile).configureEach {
@@ -79,12 +78,12 @@ subprojects { project ->
 
     ext {
         set('testcontainers.version', "1.19.7")
-
         versions = [
-                mybatisFlex: '1.9.3'
-                mybatis: '3.0.3'
+                mybatisFlex: '1.9.3',
+                mybatis    : '3.0.3'
         ]
     }
+
     // 公用的依赖
     dependencies {
         /* JPA */
@@ -129,12 +128,10 @@ subprojects { project ->
     // 相当于 Maven 的 <DependencyManagement> 标签
     dependencyManagement {
         imports {
-
-        }
-        dependencies {
-
+            // 这里可以添加一些通用的依赖版本管理
         }
     }
+
     jar {
         enabled = false
     }
@@ -144,6 +141,7 @@ subprojects { project ->
             generatedSourceDirs = []
         }
     }
+
     tasks.named('test') {
         useJUnitPlatform()
         testLogging {
@@ -164,16 +162,10 @@ subprojects { project ->
         afterEvaluate {
             classDirectories.setFrom(files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
-                        '**/Application*.class', // 排除 Spring Boot 的主类
+                        '**/Application*.class' // 排除 Spring Boot 的主类
                         // 可以添加其他想要排除的类或路径
                 ])
             }))
         }
     }
 }
-
-
-
-
-
-
