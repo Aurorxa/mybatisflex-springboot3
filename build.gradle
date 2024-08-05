@@ -79,7 +79,7 @@ subprojects { project ->
     ext {
         set('testcontainers.version', "1.19.7")
         versions = [
-                mybatisFlex: '1.9.3',
+                mybatisFlex: '1.9.5',
                 mybatis    : '3.0.3'
         ]
     }
